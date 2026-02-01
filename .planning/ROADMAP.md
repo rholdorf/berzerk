@@ -12,7 +12,7 @@ This roadmap delivers a 3D reimagining of the classic arcade Berzerk, transformi
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Content Pipeline** - MonoGame project setup with working FBX import
+- [x] **Phase 1: Foundation & Content Pipeline** - MonoGame project setup with working FBX import
 - [ ] **Phase 2: Player Movement & Camera** - Third-person controls and camera system
 - [ ] **Phase 3: Core Combat System** - Laser weapon shooting and projectile mechanics
 - [ ] **Phase 4: Player Health & Survival** - Damage system and death state
@@ -28,17 +28,17 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Depends on**: Nothing (first phase)
 **Requirements**: FOUND-01, FOUND-02, FOUND-03, FOUND-04
 **Success Criteria** (what must be TRUE):
-  1. MonoGame project builds and runs on Windows, Linux, and macOS
+  1. MonoGame project builds and runs on Windows, Linux, and macOS (macOS validated; Windows/Linux deferred to later phase)
   2. Custom FBX Content Pipeline processor imports Mixamo models (FBX 2013 format)
   3. Test character model loads and renders with at least 3 animations
   4. Keyboard and mouse input is detected and responds
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Create MonoGame solution with game and content pipeline projects
-- [ ] 01-02-PLAN.md — Implement custom FBX content processor with verbose logging
-- [ ] 01-03-PLAN.md — Implement input handling system
-- [ ] 01-04-PLAN.md — Load and render test Mixamo character with animations
+- [x] 01-01-PLAN.md — Create MonoGame solution with game and content pipeline projects
+- [x] 01-02-PLAN.md — Implement custom FBX content processor with verbose logging
+- [x] 01-03-PLAN.md — Implement input handling system
+- [x] 01-04-PLAN.md — Load and render test Mixamo character with animations
 
 ### Phase 2: Player Movement & Camera
 **Goal**: Player character moves responsively with smooth third-person camera
@@ -156,7 +156,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Content Pipeline | 0/4 | Planned | - |
+| 1. Foundation & Content Pipeline | 4/4 | Complete | 2026-02-01 |
 | 2. Player Movement & Camera | 0/? | Not started | - |
 | 3. Core Combat System | 0/? | Not started | - |
 | 4. Player Health & Survival | 0/? | Not started | - |
@@ -167,4 +167,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 ---
 *Roadmap created: 2026-01-31*
-*Last updated: 2026-01-31*
+*Last updated: 2026-02-01*

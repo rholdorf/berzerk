@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** Combate arcade intenso em salas geradas proceduralmente - a essência do Berzerk original transportada para 3D moderno com modelos animados.
-**Current focus:** Phase 1 - Foundation & Content Pipeline
+**Current focus:** Phase 2 - Player Movement & Camera
 
 ## Current Position
 
-Phase: 1 of 8 (Foundation & Content Pipeline)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-02-01 — Completed 01-04-PLAN.md
+Phase: 2 of 8 (Player Movement & Camera)
+Plan: 0 of ? in current phase (not yet planned)
+Status: Ready to plan
+Last activity: 2026-02-01 — Phase 1 complete, ready for Phase 2
 
-Progress: [████░░░░░░] 100% (Phase 1)
+Progress: [█░░░░░░░░░] 12.5% (1 of 8 phases complete)
 
 ## Performance Metrics
 

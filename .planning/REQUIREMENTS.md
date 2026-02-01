@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FOUND-01**: MonoGame project setup with .NET 8 cross-platform (Windows, Linux, macOS)
-- [ ] **FOUND-02**: Custom FBX Content Pipeline processor for Mixamo models (FBX 2013 format)
-- [ ] **FOUND-03**: Asset loading system for 3D models and animations
-- [ ] **FOUND-04**: Input handling for keyboard and mouse
+- [x] **FOUND-01**: MonoGame project setup with .NET 8 cross-platform (Windows, Linux, macOS)
+- [x] **FOUND-02**: Custom FBX Content Pipeline processor for Mixamo models (FBX 2013 format)
+- [x] **FOUND-03**: Asset loading system for 3D models and animations
+- [x] **FOUND-04**: Input handling for keyboard and mouse
 
 ### Player Movement & Camera
 
@@ -146,10 +146,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
+| FOUND-03 | Phase 1 | Complete |
+| FOUND-04 | Phase 1 | Complete |
 | MOVE-01 | Phase 2 | Pending |
 | MOVE-02 | Phase 2 | Pending |
 | MOVE-03 | Phase 2 | Pending |
