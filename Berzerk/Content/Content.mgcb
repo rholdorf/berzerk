@@ -17,3 +17,23 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Models/test-character.fbx
+/importer:FbxImporter
+/processor:MixamoModelProcessor
+/build:Models/test-character.fbx
+
+#begin Models/idle.fbx
+/importer:FbxImporter
+/processor:MixamoModelProcessor
+/build:Models/idle.fbx
+
+#begin Models/walk.fbx
+/importer:FbxImporter
+/processor:MixamoModelProcessor
+/build:Models/walk.fbx
+
+#begin Models/run.fbx
+/importer:FbxImporter
+/processor:MixamoModelProcessor
+/build:Models/run.fbx
+
