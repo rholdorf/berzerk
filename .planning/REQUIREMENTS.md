@@ -146,13 +146,63 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (To be filled by roadmapper) | | |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| MOVE-01 | Phase 2 | Pending |
+| MOVE-02 | Phase 2 | Pending |
+| MOVE-03 | Phase 2 | Pending |
+| MOVE-04 | Phase 2 | Pending |
+| MOVE-05 | Phase 2 | Pending |
+| COMBAT-01 | Phase 3 | Pending |
+| COMBAT-02 | Phase 3 | Pending |
+| COMBAT-03 | Phase 3 | Pending |
+| COMBAT-04 | Phase 3 | Pending |
+| COMBAT-05 | Phase 3 | Pending |
+| COMBAT-06 | Phase 3 | Pending |
+| COMBAT-07 | Phase 3 | Pending |
+| HEALTH-01 | Phase 4 | Pending |
+| HEALTH-02 | Phase 4 | Pending |
+| HEALTH-03 | Phase 4 | Pending |
+| HEALTH-04 | Phase 4 | Pending |
+| AI-01 | Phase 5 | Pending |
+| AI-02 | Phase 5 | Pending |
+| AI-03 | Phase 5 | Pending |
+| AI-04 | Phase 5 | Pending |
+| AI-05 | Phase 5 | Pending |
+| AI-06 | Phase 5 | Pending |
+| ANIM-05 | Phase 5 | Pending |
+| ANIM-06 | Phase 5 | Pending |
+| ANIM-07 | Phase 5 | Pending |
+| ANIM-08 | Phase 5 | Pending |
+| ROOM-01 | Phase 6 | Pending |
+| ROOM-02 | Phase 6 | Pending |
+| ROOM-03 | Phase 6 | Pending |
+| ROOM-04 | Phase 6 | Pending |
+| ROOM-05 | Phase 6 | Pending |
+| ROOM-06 | Phase 6 | Pending |
+| UI-01 | Phase 7 | Pending |
+| UI-02 | Phase 7 | Pending |
+| UI-03 | Phase 7 | Pending |
+| UI-04 | Phase 7 | Pending |
+| UI-05 | Phase 7 | Pending |
+| UI-06 | Phase 7 | Pending |
+| ANIM-01 | Phase 8 | Pending |
+| ANIM-02 | Phase 8 | Pending |
+| ANIM-03 | Phase 8 | Pending |
+| ANIM-04 | Phase 8 | Pending |
+| POLISH-01 | Phase 8 | Pending |
+| POLISH-02 | Phase 8 | Pending |
+| POLISH-03 | Phase 8 | Pending |
+| POLISH-04 | Phase 8 | Pending |
+| POLISH-05 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 43 total
-- Mapped to phases: (pending roadmap)
-- Unmapped: (pending roadmap)
+- v1 requirements: 51 total
+- Mapped to phases: 51/51 (100%)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-01-31*
-*Last updated: 2026-01-31 after initial definition*
+*Last updated: 2026-01-31 after roadmap creation*
