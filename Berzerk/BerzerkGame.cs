@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Berzerk.Source.Input;
 
 namespace Berzerk;
 
@@ -8,6 +9,7 @@ public class BerzerkGame : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+    private InputManager _inputManager;
 
     public BerzerkGame()
     {
@@ -18,7 +20,8 @@ public class BerzerkGame : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
+        // Initialize input manager
+        _inputManager = new InputManager();
 
         base.Initialize();
     }
@@ -32,7 +35,11 @@ public class BerzerkGame : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        // Update input state at start of frame
+        _inputManager.Update();
+
+        // Test: Escape key exits game
+        if (_inputManager.IsKeyPressed(Keys.Escape))
             Exit();
 
         // TODO: Add your update logic here
