@@ -32,10 +32,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Custom FBX Content Pipeline processor imports Mixamo models (FBX 2013 format)
   3. Test character model loads and renders with at least 3 animations
   4. Keyboard and mouse input is detected and responds
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD (to be planned in /gsd:plan-phase 1)
+- [ ] 01-01-PLAN.md — Create MonoGame solution with game and content pipeline projects
+- [ ] 01-02-PLAN.md — Implement custom FBX content processor with verbose logging
+- [ ] 01-03-PLAN.md — Implement input handling system
+- [ ] 01-04-PLAN.md — Load and render test Mixamo character with animations
 
 ### Phase 2: Player Movement & Camera
 **Goal**: Player character moves responsively with smooth third-person camera
@@ -149,11 +152,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Content Pipeline | 0/? | Not started | - |
+| 1. Foundation & Content Pipeline | 0/4 | Planned | - |
 | 2. Player Movement & Camera | 0/? | Not started | - |
 | 3. Core Combat System | 0/? | Not started | - |
 | 4. Player Health & Survival | 0/? | Not started | - |
