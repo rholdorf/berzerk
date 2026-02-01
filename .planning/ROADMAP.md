@@ -46,14 +46,17 @@ Plans:
 **Requirements**: MOVE-01, MOVE-02, MOVE-03, MOVE-04, MOVE-05
 **Success Criteria** (what must be TRUE):
   1. Player character moves in 3D space using WASD controls
-  2. Player character rotates toward mouse cursor direction
+  2. Player character rotates toward movement direction
   3. Third-person camera follows player smoothly with spring interpolation
   4. Camera does not clip through walls (collision detection active)
   5. Camera distance and angle can be adjusted
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD (to be planned in /gsd:plan-phase 2)
+- [ ] 02-01-PLAN.md — Input extension and Transform foundation
+- [ ] 02-02-PLAN.md — Player movement controller with WASD
+- [ ] 02-03-PLAN.md — Third-person camera with collision and zoom
+- [ ] 02-04-PLAN.md — Integration and verification checkpoint
 
 ### Phase 3: Core Combat System
 **Goal**: Player can shoot laser weapon with visible projectiles that hit targets
@@ -157,7 +160,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Content Pipeline | 4/4 | Complete | 2026-02-01 |
-| 2. Player Movement & Camera | 0/? | Not started | - |
+| 2. Player Movement & Camera | 0/4 | Planned | - |
 | 3. Core Combat System | 0/? | Not started | - |
 | 4. Player Health & Survival | 0/? | Not started | - |
 | 5. Enemy AI & Combat | 0/? | Not started | - |
