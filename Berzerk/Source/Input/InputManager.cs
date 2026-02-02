@@ -82,4 +82,27 @@ public class InputManager
         _currentMouse.X - _previousMouse.X,
         _currentMouse.Y - _previousMouse.Y
     );
+
+    /// <summary>
+    /// Get scroll wheel delta from previous frame.
+    /// Positive = scroll up (zoom in), Negative = scroll down (zoom out).
+    /// ScrollWheelValue is cumulative, so we calculate per-frame delta.
+    /// </summary>
+    public int ScrollWheelDelta => _currentMouse.ScrollWheelValue - _previousMouse.ScrollWheelValue;
+
+    /// <summary>
+    /// Check if left mouse button is currently held down.
+    /// </summary>
+    public bool IsLeftMouseHeld()
+    {
+        return _currentMouse.LeftButton == ButtonState.Pressed;
+    }
+
+    /// <summary>
+    /// Check if right mouse button is currently held down (for camera orbit).
+    /// </summary>
+    public bool IsRightMouseHeld()
+    {
+        return _currentMouse.RightButton == ButtonState.Pressed;
+    }
 }
