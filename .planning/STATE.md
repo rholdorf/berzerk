@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 
 ## Current Position
 
-Phase: 3 of 8 IN PROGRESS (Core Combat System)
-Plan: 03 of 4 complete in Phase 3
-Status: Phase 3 in progress
-Last activity: 2026-02-02 — Completed 03-02-PLAN.md (Projectile rendering and collision) Task 3
+Phase: 3 of 8 COMPLETE (Core Combat System)
+Plan: 4 of 4 complete in Phase 3
+Status: Phase 3 finalized, ready for Phase 4
+Last activity: 2026-02-02 — Completed 03-04-PLAN.md (Integration and verification)
 
-Progress: [███░░░░░░░] 32% (14 of 44 total plans complete across all phases)
+Progress: [████████████] 100% (12 of 12 total plans complete in Phases 1-3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 23.5 min
-- Total execution time: 5.32 hours
+- Total plans completed: 12
+- Average duration: 26.2 min
+- Total execution time: 5.22 hours
 
 **By Phase:**
 
@@ -29,15 +29,16 @@ Progress: [███░░░░░░░] 32% (14 of 44 total plans complete ac
 |-------|-------|-------|----------|
 | 01 - Foundation & Content Pipeline | 4 | 161.1 min | 40.3 min |
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
-| 03 - Core Combat System | 3 | 8.0 min | 2.7 min |
+| 03 - Core Combat System | 4 | 15.0 min | 3.8 min |
 | **Phase 3 breakdown** | | | |
 | 03-01 (Core Infrastructure) | 1 | 2.0 min | 2.0 min |
 | 03-02 (Projectile Visuals) | 1 | 4.0 min | 4.0 min |
 | 03-03 (Test Targets) | 1 | 2.0 min | 2.0 min |
+| 03-04 (Integration) | 1 | 7.0 min | 7.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (2 min), 02-04 (955 min), 03-01 (2 min), 03-02 (2 min), 03-03 (2 min)
-- Trend: Pure code generation plans very fast (2 min), integration/validation plans slower
+- Last 5 plans: 02-04 (955 min), 03-01 (2 min), 03-02 (4 min), 03-03 (2 min), 03-04 (7 min)
+- Trend: Pure code generation plans very fast (2-4 min), integration/validation plans vary (7-955 min)
 
 *Updated after each plan completion*
 
@@ -98,6 +99,11 @@ Recent decisions affecting current work:
 - 03-03: AmmoPickup amount 40, auto-collect radius 2f (generous arcade forgiveness)
 - 03-03: Bobbing animation for pickups using sin(time * speed) * height
 - 03-03: Pickup pooling (size 10) handles multiple target destructions without GC
+- 03-04: Camera forward vector = normalized(lookAt - cameraPosition) for aim direction
+- 03-04: Projectile spawn at player position + Vector3.Up * 1.5f for shoulder height
+- 03-04: R key respawns all targets for iterative testing without game restart
+- 03-04: Combat update order: weapon → projectiles → targets → pickups for state propagation
+- 03-04: Console output for ammo feedback during Phase 3 validation (defer HUD to Phase 8)
 
 ### Pending Todos
 
@@ -123,10 +129,10 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 03-02-PLAN.md Task 3 (impact effect rendering)
+Stopped at: Completed 03-04-PLAN.md (Integration and verification)
 Resume file: None
 
-**Phase 3 Progress:** Combat system 75% complete (3 of 4 plans). Projectile infrastructure with object pooling, ammo system with magazine+reserve, visual rendering with glowing spheres using UV mesh generation and BasicEffect emissive, wall collision detection with impact effects, test targets with hit feedback, and ammo pickups with auto-collect all implemented. Ready for Plan 04 (integration into game loop with player shooting, target collision, and pickup collection).
+**Phase 3 Complete:** Combat system fully integrated and verified. Projectile infrastructure with object pooling, ammo system with magazine+reserve, visual rendering with glowing cyan spheres, wall collision with orange impact effects, test targets with hit feedback and destruction, ammo pickups with auto-collect, camera-directed aiming, and player shooting with left mouse button all working. Ready for Phase 4 planning.
 
 ---
 *State initialized: 2026-01-31*
