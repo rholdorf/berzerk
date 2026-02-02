@@ -159,12 +159,17 @@ public class MixamoModelProcessor : ModelProcessor
             context.Logger.LogMessage("Built bone index mapping with {0} bones", animationData.BoneIndices.Count);
         }
 
-        // For now, just store clip names and durations
-        // Actual keyframe extraction will be implemented when needed
+        // Extract keyframes from animations
         foreach (var anim in animations)
         {
             var clip = new AnimationClip(anim.Key, anim.Value);
+
+            // Extract keyframes from NodeContent animation data
+            ExtractKeyframes(skeleton, anim.Key, clip, animationData.BoneIndices, context);
+
             animationData.Clips[anim.Key] = clip;
+            context.Logger.LogMessage("Extracted animation '{0}' with {1} bone tracks",
+                anim.Key, clip.Keyframes.Count);
         }
 
         return animationData;
@@ -183,5 +188,61 @@ public class MixamoModelProcessor : ModelProcessor
             BuildBoneIndices(child, indices, childIndex);
             childIndex++;
         }
+    }
+
+    /// <summary>
+    /// Extracts keyframes from bone animations and populates the animation clip.
+    /// In Mixamo FBX files, all animation channels are stored on the root bone,
+    /// with each channel named after the bone it affects.
+    /// </summary>
+    private void ExtractKeyframes(
+        BoneContent? skeleton,
+        string animationName,
+        AnimationClip clip,
+        System.Collections.Generic.Dictionary<string, int> boneIndices,
+        ContentProcessorContext context)
+    {
+        if (skeleton == null)
+            return;
+
+        // Find the animation on the root bone (Mixamo stores all channels there)
+        if (!skeleton.Animations.TryGetValue(animationName, out AnimationContent? animation))
+        {
+            context.Logger.LogWarning(null, null,
+                "Animation '{0}' not found on root bone '{1}'", animationName, skeleton.Name);
+            return;
+        }
+
+        context.Logger.LogMessage("Extracting {0} channels from animation '{1}'",
+            animation.Channels.Count, animationName);
+
+        // Each channel is named after the bone it animates
+        foreach (var channel in animation.Channels)
+        {
+            string boneName = channel.Key;
+            var animKeyframes = channel.Value;
+
+            // Get bone index for this channel
+            if (!boneIndices.TryGetValue(boneName, out int boneIndex))
+            {
+                continue; // Skip bones not in our skeleton
+            }
+
+            // Convert animation keyframes to our Keyframe format
+            var keyframes = new System.Collections.Generic.List<Keyframe>();
+            foreach (var animKeyframe in animKeyframes)
+            {
+                keyframes.Add(new Keyframe(
+                    animKeyframe.Time,
+                    boneIndex,
+                    animKeyframe.Transform));
+            }
+
+            // Sort by time and store
+            keyframes.Sort((a, b) => a.Time.CompareTo(b.Time));
+            clip.Keyframes[boneName] = keyframes;
+        }
+
+        context.Logger.LogMessage("Extracted {0} bone tracks", clip.Keyframes.Count);
     }
 }
