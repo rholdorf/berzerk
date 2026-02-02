@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Berzerk.Source.Input;
 using Berzerk.Source.Core;
+using Berzerk.Controllers;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,7 @@ public class ThirdPersonCamera
 {
     private InputManager _inputManager;
     private Transform _target;  // Player's transform to follow
+    private PlayerController _playerController;  // For movement state checking
 
     // Camera state
     private Vector3 _currentPosition;
@@ -48,10 +50,11 @@ public class ThirdPersonCamera
     public Matrix ViewMatrix { get; private set; }
     public Matrix ProjectionMatrix { get; private set; }
 
-    public ThirdPersonCamera(InputManager inputManager, Transform target)
+    public ThirdPersonCamera(InputManager inputManager, Transform target, PlayerController playerController)
     {
         _inputManager = inputManager;
         _target = target;
+        _playerController = playerController;
         _currentPosition = target.Position + GetDesiredOffset();
     }
 
@@ -114,6 +117,7 @@ public class ThirdPersonCamera
     {
         if (_inputManager.IsRightMouseHeld())
         {
+            // Free orbit mode
             var mouseDelta = _inputManager.MouseDelta;
 
             // Horizontal: yaw (rotate around Y axis)
@@ -123,6 +127,29 @@ public class ThirdPersonCamera
             _currentPitch += mouseDelta.Y * OrbitSensitivity;
             _currentPitch = MathHelper.Clamp(_currentPitch, PitchMin, PitchMax);
         }
+        else if (_playerController.IsMoving)
+        {
+            // Auto-follow mode: Smoothly rotate camera behind character
+            // Get character's forward direction
+            Vector3 characterForward = _target.Forward;
+
+            // Calculate desired yaw (angle behind character)
+            float desiredYaw = MathF.Atan2(characterForward.X, characterForward.Z) + MathF.PI;
+
+            // Smooth rotation toward desired yaw
+            float yawDiff = desiredYaw - _currentYaw;
+
+            // Handle angle wrapping (-π to π)
+            while (yawDiff > MathF.PI) yawDiff -= MathF.PI * 2;
+            while (yawDiff < -MathF.PI) yawDiff += MathF.PI * 2;
+
+            // Apply smooth rotation (faster than orbit for responsiveness)
+            const float AutoFollowSpeed = 5f; // Radians per second
+            float maxRotation = AutoFollowSpeed * deltaTime;
+            float rotationAmount = MathHelper.Clamp(yawDiff, -maxRotation, maxRotation);
+            _currentYaw += rotationAmount;
+        }
+        // else: Character stationary and no RMB - camera stays at current angle
     }
 
     private void UpdateAutoPitch()

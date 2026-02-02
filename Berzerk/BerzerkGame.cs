@@ -45,7 +45,7 @@ public class BerzerkGame : Game
         _playerController = new PlayerController(_inputManager);
 
         // Initialize camera and crosshair
-        _camera = new ThirdPersonCamera(_inputManager, _playerController.Transform);
+        _camera = new ThirdPersonCamera(_inputManager, _playerController.Transform, _playerController);
         _crosshair = new Crosshair();
 
         base.Initialize();
