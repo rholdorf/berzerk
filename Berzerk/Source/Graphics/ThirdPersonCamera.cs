@@ -90,11 +90,6 @@ public class ThirdPersonCamera
         float finalDistance = CheckCollision(_target.Position, desiredPosition);
         Vector3 collisionAdjustedPosition = _target.Position + GetOffsetAtDistance(finalDistance);
 
-        if (finalDistance != _currentDistance)
-        {
-            Console.WriteLine($"Update: Collision adjustment applied - finalDistance={finalDistance}, currentDistance={_currentDistance}");
-        }
-
         // 6. Smooth camera position (exponential decay lerp)
         float smoothFactor = 1f - MathF.Pow(PositionDamping, deltaTime);
         _currentPosition = Vector3.Lerp(_currentPosition, collisionAdjustedPosition, smoothFactor);
@@ -190,13 +185,10 @@ public class ThirdPersonCamera
             float? intersection = ray.Intersects(box);
             if (intersection.HasValue && intersection.Value > 0 && intersection.Value < closestHit)
             {
-                Console.WriteLine($"Collision detected at distance {intersection.Value}");
                 closestHit = intersection.Value;
                 hitDetected = true;
             }
         }
-
-        Console.WriteLine($"CheckCollision: hitDetected={hitDetected}, closestHit={closestHit}, desiredDistance={desiredDistance}");
 
         // If no collision detected, allow camera to move to desired distance
         if (!hitDetected)
@@ -207,9 +199,9 @@ public class ThirdPersonCamera
         // Apply collision offset (don't clip exactly at surface)
         float collisionDistance = MathF.Max(closestHit - CollisionOffset, MinDistance);
 
-        // Smooth zoom back out when collision clears
-        float distanceSmoothFactor = 1f - MathF.Pow(DistanceDamping, 0.016f); // Assume ~60fps for distance smooth
-        return MathHelper.Lerp(_currentDistance, collisionDistance, distanceSmoothFactor);
+        // Return the collision-adjusted distance directly
+        // Position smoothing in Update() will handle the smooth transition
+        return collisionDistance;
     }
 
     /// <summary>
