@@ -13,7 +13,7 @@ This roadmap delivers a 3D reimagining of the classic arcade Berzerk, transformi
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Content Pipeline** - MonoGame project setup with working FBX import
-- [ ] **Phase 2: Player Movement & Camera** - Third-person controls and camera system
+- [x] **Phase 2: Player Movement & Camera** - Third-person controls and camera system
 - [ ] **Phase 3: Core Combat System** - Laser weapon shooting and projectile mechanics
 - [ ] **Phase 4: Player Health & Survival** - Damage system and death state
 - [ ] **Phase 5: Enemy AI & Combat** - Robot enemies with combat behavior
@@ -53,10 +53,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Input extension and Transform foundation
-- [ ] 02-02-PLAN.md — Player movement controller with WASD
-- [ ] 02-03-PLAN.md — Third-person camera with collision and zoom
-- [ ] 02-04-PLAN.md — Integration and verification checkpoint
+- [x] 02-01-PLAN.md — Input extension and Transform foundation
+- [x] 02-02-PLAN.md — Player movement controller with WASD
+- [x] 02-03-PLAN.md — Third-person camera with collision and zoom
+- [x] 02-04-PLAN.md — Integration and verification checkpoint
 
 ### Phase 3: Core Combat System
 **Goal**: Player can shoot laser weapon with visible projectiles that hit targets
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Content Pipeline | 4/4 | Complete | 2026-02-01 |
-| 2. Player Movement & Camera | 0/4 | Planned | - |
+| 2. Player Movement & Camera | 4/4 | Complete | 2026-02-02 |
 | 3. Core Combat System | 0/? | Not started | - |
 | 4. Player Health & Survival | 0/? | Not started | - |
 | 5. Enemy AI & Combat | 0/? | Not started | - |
@@ -170,4 +170,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 ---
 *Roadmap created: 2026-01-31*
-*Last updated: 2026-02-01*
+*Last updated: 2026-02-02*

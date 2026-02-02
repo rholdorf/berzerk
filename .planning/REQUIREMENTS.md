@@ -16,11 +16,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Player Movement & Camera
 
-- [ ] **MOVE-01**: Player character moves with WASD controls
-- [ ] **MOVE-02**: Player rotation based on mouse movement
-- [ ] **MOVE-03**: Third-person camera follows player smoothly
-- [ ] **MOVE-04**: Camera collision detection (no clipping through walls)
-- [ ] **MOVE-05**: Camera distance and angle adjustable
+- [x] **MOVE-01**: Player character moves with WASD controls
+- [x] **MOVE-02**: Player rotation based on mouse movement
+- [x] **MOVE-03**: Third-person camera follows player smoothly
+- [x] **MOVE-04**: Camera collision detection (no clipping through walls)
+- [x] **MOVE-05**: Camera distance and angle adjustable
 
 ### Combat System
 
@@ -150,11 +150,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Complete |
-| MOVE-01 | Phase 2 | Pending |
-| MOVE-02 | Phase 2 | Pending |
-| MOVE-03 | Phase 2 | Pending |
-| MOVE-04 | Phase 2 | Pending |
-| MOVE-05 | Phase 2 | Pending |
+| MOVE-01 | Phase 2 | Complete |
+| MOVE-02 | Phase 2 | Complete |
+| MOVE-03 | Phase 2 | Complete |
+| MOVE-04 | Phase 2 | Complete |
+| MOVE-05 | Phase 2 | Complete |
 | COMBAT-01 | Phase 3 | Pending |
 | COMBAT-02 | Phase 3 | Pending |
 | COMBAT-03 | Phase 3 | Pending |
