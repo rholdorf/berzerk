@@ -3,8 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Berzerk.Source.Input;
 using Berzerk.Graphics;
+using Berzerk.Source.Graphics;
 using Berzerk.Controllers;
+using Berzerk.UI;
 using System;
+using System.Collections.Generic;
 
 namespace Berzerk;
 
@@ -14,6 +17,9 @@ public class BerzerkGame : Game
     private SpriteBatch _spriteBatch;
     private InputManager _inputManager;
     private PlayerController _playerController;
+    private ThirdPersonCamera _camera;
+    private Crosshair _crosshair;
+    private List<BoundingBox> _testWalls;
 
     // Test animated model and animations
     private AnimatedModel _testCharacter;
@@ -22,15 +28,11 @@ public class BerzerkGame : Game
     private AnimatedModel _runAnimation;
     private AnimatedModel _currentModel;
 
-    // Camera matrices
-    private Matrix _viewMatrix;
-    private Matrix _projectionMatrix;
-
     public BerzerkGame()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible = true;
+        IsMouseVisible = false;  // Hide OS cursor (we draw our own crosshair)
     }
 
     protected override void Initialize()
@@ -40,6 +42,10 @@ public class BerzerkGame : Game
 
         // Initialize player controller
         _playerController = new PlayerController(_inputManager);
+
+        // Initialize camera and crosshair
+        _camera = new ThirdPersonCamera(_inputManager, _playerController.Transform);
+        _crosshair = new Crosshair();
 
         base.Initialize();
     }
@@ -69,27 +75,22 @@ public class BerzerkGame : Game
             _currentModel.PlayAnimation(animNames[0]);
         }
 
-        // Set up camera
-        _viewMatrix = Matrix.CreateLookAt(
-            new Vector3(0, 100, 200),  // Camera position (moved back and up for better view)
-            new Vector3(0, 50, 0),     // Look at point (center of character)
-            Vector3.Up                 // Up direction
-        );
+        // Initialize camera
+        _camera.Initialize(GraphicsDevice);
+        _crosshair.LoadContent(GraphicsDevice);
 
-        _projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-            MathHelper.PiOver4,                          // 45 degree field of view
-            GraphicsDevice.Viewport.AspectRatio,         // Aspect ratio
-            0.1f,                                        // Near plane
-            1000f                                        // Far plane
-        );
+        // Set up test collision walls
+        _testWalls = ThirdPersonCamera.CreateTestWalls();
+        _camera.SetCollisionGeometry(_testWalls);
 
-        Console.WriteLine("\n=== Animation Test Controls ===");
+        Console.WriteLine("\n=== Controls ===");
         Console.WriteLine("WASD: Move player");
-        Console.WriteLine("Press 1: Play idle animation");
-        Console.WriteLine("Press 2: Play walk animation");
-        Console.WriteLine("Press 3: Play run animation");
-        Console.WriteLine("Press Escape: Exit");
-        Console.WriteLine("================================\n");
+        Console.WriteLine("Mouse: Aim (crosshair)");
+        Console.WriteLine("Right-click + drag: Orbit camera");
+        Console.WriteLine("Scroll wheel: Zoom camera");
+        Console.WriteLine("1/2/3: Switch animations");
+        Console.WriteLine("Escape: Exit");
+        Console.WriteLine("================\n");
     }
 
     protected override void Update(GameTime gameTime)
@@ -99,6 +100,9 @@ public class BerzerkGame : Game
 
         // Update player controller
         _playerController.Update(gameTime);
+
+        // Update camera
+        _camera.Update(gameTime);
 
         // Test: Escape key exits game
         if (_inputManager.IsKeyPressed(Keys.Escape))
@@ -146,17 +150,17 @@ public class BerzerkGame : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // Temporary: Update camera to follow player
-        Vector3 cameraOffset = new Vector3(0, 100, 200);
-        Vector3 cameraPos = _playerController.Transform.Position + cameraOffset;
-        _viewMatrix = Matrix.CreateLookAt(
-            cameraPos,
-            _playerController.Transform.Position + new Vector3(0, 50, 0),
-            Vector3.Up
+        // Draw 3D content with camera matrices
+        _currentModel?.Draw(
+            _playerController.Transform.WorldMatrix,
+            _camera.ViewMatrix,
+            _camera.ProjectionMatrix
         );
 
-        // Draw the current animated model at player position
-        _currentModel?.Draw(_playerController.Transform.WorldMatrix, _viewMatrix, _projectionMatrix);
+        // Draw 2D UI (crosshair)
+        _spriteBatch.Begin();
+        _crosshair.Draw(_spriteBatch, GraphicsDevice.Viewport);
+        _spriteBatch.End();
 
         base.Draw(gameTime);
     }
