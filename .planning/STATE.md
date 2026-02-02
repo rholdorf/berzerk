@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 
 ## Current Position
 
-Phase: 2 of 8 COMPLETE (Player Movement & Camera)
-Plan: All 4 plans complete in Phase 2
-Status: Phase 2 finalized, ready for Phase 3
-Last activity: 2026-02-02 — Completed Phase 2 with tank controls and camera system
+Phase: 3 of 8 IN PROGRESS (Core Combat System)
+Plan: 01 of 4 complete in Phase 3
+Status: Phase 3 in progress
+Last activity: 2026-02-02 — Completed 03-01-PLAN.md (Core combat infrastructure)
 
-Progress: [██░░░░░░░░] 25% (2 of 8 phases complete, 11 total plans)
+Progress: [██░░░░░░░░] 27% (12 of 44 total plans complete across all phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 28.2 min
-- Total execution time: 5.16 hours
+- Total plans completed: 12
+- Average duration: 27.0 min
+- Total execution time: 5.19 hours
 
 **By Phase:**
 
@@ -29,17 +29,13 @@ Progress: [██░░░░░░░░] 25% (2 of 8 phases complete, 11 total
 |-------|-------|-------|----------|
 | 01 - Foundation & Content Pipeline | 4 | 161.1 min | 40.3 min |
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
-| **Phase 2 breakdown** | | | |
-| 02-01 (Input & Transform) | 1 | 1.0 min | 1.0 min |
-| 02-02 (Player Controller) | 1 | 2.0 min | 2.0 min |
-| 02-03 (Third-Person Camera) | 1 | 2.0 min | 2.0 min |
-| 02-04 (Integration) | 1 | 955 min* | 955 min* |
-
-*Note: 02-04 total time includes extended human validation and iterative refinement sessions (22 commits over 15h55m). Active execution time ~3 hours.
+| 03 - Core Combat System | 1 | 2.0 min | 2.0 min |
+| **Phase 3 breakdown** | | | |
+| 03-01 (Core Infrastructure) | 1 | 2.0 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (1 min), 02-02 (2 min), 02-03 (2 min), 02-04 (955 min)
-- Trend: Integration plans with human validation take significantly longer than automated plans
+- Last 5 plans: 02-02 (2 min), 02-03 (2 min), 02-04 (955 min), 03-01 (2 min)
+- Trend: Pure code generation plans very fast (1-2 min), integration/validation plans slower
 
 *Updated after each plan completion*
 
@@ -84,6 +80,11 @@ Recent decisions affecting current work:
 - 02-04: Model scale factor 0.01x for Mixamo assets (centimeters → game units)
 - 02-04: Keyframe extraction from FBX, per-frame interpolation, bone hierarchy composition
 - 02-04: Crosshair UI with programmatic texture generation (no external assets)
+- 03-01: Object pooling with Queue<Projectile> prevents GC spikes (pre-allocate 50)
+- 03-01: Distance-based projectile lifetime (75 units) instead of time-based
+- 03-01: Fire rate 6.5 shots/sec, projectile speed 50 units/sec (middle of CONTEXT ranges)
+- 03-01: Magazine 25 rounds + reserve 125 rounds with auto-reload
+- 03-01: Frame-rate independent cooldown using GameTime.ElapsedGameTime.TotalSeconds
 
 ### Pending Todos
 
@@ -108,12 +109,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-02 (phase completion)
-Stopped at: Phase 2 complete - all success criteria met
+Last session: 2026-02-02
+Stopped at: Completed 03-01-PLAN.md (Core combat infrastructure)
 Resume file: None
 
-**Phase 2 Complete:** Player movement with tank controls (W/S/A/D/Q/E), third-person camera with smooth following, collision detection, zoom, and orbit. Skeletal animation working. Crosshair UI implemented. Ready for Phase 3 (Core Combat System).
+**Phase 3 Progress:** Combat namespace created with Projectile, ProjectileManager, AmmoSystem, and WeaponSystem. Object pooling implemented (50 projectiles pre-allocated). Magazine+reserve ammo system with auto-reload. Fire rate limiting (6.5 shots/sec) with frame-rate independent timing. Ready for Plan 02 (projectile visuals and wall collision).
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-02*
+*Last updated: 2026-02-02 (03-01 complete)*
