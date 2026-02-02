@@ -55,8 +55,8 @@ public class PlayerController
     private void HandleRotation(float deltaTime)
     {
         float rotationInput = 0f;
-        if (_inputManager.IsKeyHeld(Keys.A)) rotationInput -= 1f;
-        if (_inputManager.IsKeyHeld(Keys.D)) rotationInput += 1f;
+        if (_inputManager.IsKeyHeld(Keys.A)) rotationInput += 1f;  // Changed to +1 for counterclockwise (left)
+        if (_inputManager.IsKeyHeld(Keys.D)) rotationInput -= 1f;  // Changed to -1 for clockwise (right)
 
         if (Math.Abs(rotationInput) > 0.01f)
         {
