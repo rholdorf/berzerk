@@ -50,6 +50,19 @@ public class ThirdPersonCamera
     public Matrix ViewMatrix { get; private set; }
     public Matrix ProjectionMatrix { get; private set; }
 
+    /// <summary>
+    /// Get camera forward direction for aiming projectiles.
+    /// </summary>
+    public Vector3 Forward
+    {
+        get
+        {
+            // Camera looks at target, so forward = normalized(target - position)
+            Vector3 lookAt = _target.Position + new Vector3(0, 1f, 0);
+            return Vector3.Normalize(lookAt - _currentPosition);
+        }
+    }
+
     public ThirdPersonCamera(InputManager inputManager, Transform target, PlayerController playerController)
     {
         _inputManager = inputManager;
