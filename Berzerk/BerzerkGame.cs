@@ -20,6 +20,7 @@ public class BerzerkGame : Game
     private ThirdPersonCamera _camera;
     private Crosshair _crosshair;
     private List<BoundingBox> _testWalls;
+    private DebugRenderer _debugRenderer;
 
     // Test animated model and animations
     private AnimatedModel _testCharacter;
@@ -75,9 +76,10 @@ public class BerzerkGame : Game
             _currentModel.PlayAnimation(animNames[0]);
         }
 
-        // Initialize camera
+        // Initialize camera and debug renderer
         _camera.Initialize(GraphicsDevice);
         _crosshair.LoadContent(GraphicsDevice);
+        _debugRenderer = new DebugRenderer(GraphicsDevice);
 
         // Set up test collision walls
         _testWalls = ThirdPersonCamera.CreateTestWalls();
@@ -149,6 +151,12 @@ public class BerzerkGame : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
+
+        // Draw floor grid
+        _debugRenderer.DrawFloor(_camera.ViewMatrix, _camera.ProjectionMatrix);
+
+        // Draw collision walls
+        _debugRenderer.DrawBoundingBoxes(_testWalls, _camera.ViewMatrix, _camera.ProjectionMatrix, Color.White);
 
         // Draw 3D content with camera matrices
         // Scale down model by 0.01x - Mixamo models are typically 100x too large
