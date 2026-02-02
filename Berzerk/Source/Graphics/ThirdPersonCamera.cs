@@ -172,18 +172,27 @@ public class ThirdPersonCamera
             return _currentDistance;
 
         direction = Vector3.Normalize(direction);
-        Ray ray = new Ray(playerPos, direction);
+
+        // Offset the ray start slightly above player position to avoid ground collision
+        Vector3 rayStart = playerPos + new Vector3(0, 1f, 0);
+        Ray ray = new Ray(rayStart, direction);
 
         float closestHit = desiredDistance;
+        bool hitDetected = false;
 
         foreach (var box in _collisionGeometry)
         {
             float? intersection = ray.Intersects(box);
-            if (intersection.HasValue && intersection.Value < closestHit)
+            if (intersection.HasValue && intersection.Value > 0 && intersection.Value < closestHit)
             {
                 closestHit = intersection.Value;
+                hitDetected = true;
             }
         }
+
+        // Only apply collision if we actually hit something
+        if (!hitDetected)
+            return _currentDistance;
 
         // Apply collision offset (don't clip exactly at surface)
         float finalDistance = MathF.Max(closestHit - CollisionOffset, MinDistance);
