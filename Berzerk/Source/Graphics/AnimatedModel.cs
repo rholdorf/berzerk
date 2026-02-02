@@ -159,14 +159,32 @@ public class AnimatedModel
         if (_model == null)
             return;
 
-        // Start with default bone transforms
-        _model.CopyAbsoluteBoneTransformsTo(_boneTransforms);
+        // Start with bind pose (local transforms for each bone)
+        Matrix[] localTransforms = new Matrix[_model.Bones.Count];
+        for (int i = 0; i < _model.Bones.Count; i++)
+        {
+            localTransforms[i] = _model.Bones[i].Transform;
+        }
 
-        // Apply keyframe transforms for each bone
+        // Override with animated transforms from keyframes
         foreach (var boneName in clip.Keyframes.Keys)
         {
             var keyframes = clip.Keyframes[boneName];
             if (keyframes.Count == 0)
+                continue;
+
+            // Find bone by name
+            int boneIndex = -1;
+            for (int i = 0; i < _model.Bones.Count; i++)
+            {
+                if (_model.Bones[i].Name == boneName)
+                {
+                    boneIndex = i;
+                    break;
+                }
+            }
+
+            if (boneIndex == -1)
                 continue;
 
             // Find the two keyframes to interpolate between
@@ -207,12 +225,24 @@ public class AnimatedModel
                     transform = currentFrame.Transform;
                 }
 
-                // Apply transform to bone
-                int boneIndex = currentFrame.BoneIndex;
-                if (boneIndex >= 0 && boneIndex < _boneTransforms.Length)
-                {
-                    _boneTransforms[boneIndex] = transform;
-                }
+                // Apply animated local transform
+                localTransforms[boneIndex] = transform;
+            }
+        }
+
+        // Build absolute transforms by composing local transforms up the hierarchy
+        for (int i = 0; i < _model.Bones.Count; i++)
+        {
+            if (_model.Bones[i].Parent == null)
+            {
+                // Root bone
+                _boneTransforms[i] = localTransforms[i];
+            }
+            else
+            {
+                // Child bone: multiply local transform by parent's absolute transform
+                int parentIndex = _model.Bones.IndexOf(_model.Bones[i].Parent);
+                _boneTransforms[i] = localTransforms[i] * _boneTransforms[parentIndex];
             }
         }
     }
