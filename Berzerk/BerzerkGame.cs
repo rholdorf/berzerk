@@ -151,8 +151,12 @@ public class BerzerkGame : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         // Draw 3D content with camera matrices
+        // Scale down model by 0.01x - Mixamo models are typically 100x too large
+        Matrix modelScale = Matrix.CreateScale(0.01f);
+        Matrix worldMatrix = modelScale * _playerController.Transform.WorldMatrix;
+
         _currentModel?.Draw(
-            _playerController.Transform.WorldMatrix,
+            worldMatrix,
             _camera.ViewMatrix,
             _camera.ProjectionMatrix
         );
