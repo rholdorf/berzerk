@@ -79,7 +79,7 @@ public class PlayerController
 
         // Create target rotation looking in movement direction
         // Use Atan2 to calculate yaw angle from direction vector
-        float targetYaw = MathF.Atan2(direction.X, -direction.Z);
+        float targetYaw = MathF.Atan2(direction.X, direction.Z);
         Quaternion targetRotation = Quaternion.CreateFromAxisAngle(Vector3.Up, targetYaw);
 
         // Slerp for smooth rotation blend
