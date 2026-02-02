@@ -69,10 +69,13 @@ Plans:
   4. Projectiles collide with test targets and register hits
   5. Ammunition counter decreases when firing
   6. Ammo pickups spawn and can be collected to restore ammunition
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD (to be planned in /gsd:plan-phase 3)
+- [ ] 03-01-PLAN.md — Core combat infrastructure (Projectile, ProjectileManager, AmmoSystem, WeaponSystem)
+- [ ] 03-02-PLAN.md — Projectile visuals and wall collision with impact effects
+- [ ] 03-03-PLAN.md — Test targets and ammo pickups
+- [ ] 03-04-PLAN.md — Integration and verification checkpoint
 
 ### Phase 4: Player Health & Survival
 **Goal**: Player has health system and can die
@@ -161,7 +164,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation & Content Pipeline | 4/4 | Complete | 2026-02-01 |
 | 2. Player Movement & Camera | 4/4 | Complete | 2026-02-02 |
-| 3. Core Combat System | 0/? | Not started | - |
+| 3. Core Combat System | 0/4 | Planned | - |
 | 4. Player Health & Survival | 0/? | Not started | - |
 | 5. Enemy AI & Combat | 0/? | Not started | - |
 | 6. Room System & Progression | 0/? | Not started | - |
