@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** Combate arcade intenso em salas geradas proceduralmente - a essência do Berzerk original transportada para 3D moderno com modelos animados.
-**Current focus:** Ready for Phase 3 - Core Combat System
+**Current focus:** Ready for Phase 4 - Player Health & Survival
 
 ## Current Position
 
@@ -14,7 +14,7 @@ Plan: 4 of 4 complete in Phase 3
 Status: Phase 3 finalized, ready for Phase 4
 Last activity: 2026-02-02 — Completed 03-04-PLAN.md (Integration and verification)
 
-Progress: [████████████] 100% (12 of 12 total plans complete in Phases 1-3)
+Progress: [███░░░░░░░░░] 37.5% (3 of 8 phases complete, 12 total plans)
 
 ## Performance Metrics
 

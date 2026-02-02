@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Content Pipeline** - MonoGame project setup with working FBX import
 - [x] **Phase 2: Player Movement & Camera** - Third-person controls and camera system
-- [ ] **Phase 3: Core Combat System** - Laser weapon shooting and projectile mechanics
+- [x] **Phase 3: Core Combat System** - Laser weapon shooting and projectile mechanics
 - [ ] **Phase 4: Player Health & Survival** - Damage system and death state
 - [ ] **Phase 5: Enemy AI & Combat** - Robot enemies with combat behavior
 - [ ] **Phase 6: Room System & Progression** - Room structure with door progression
@@ -72,10 +72,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Core combat infrastructure (Projectile, ProjectileManager, AmmoSystem, WeaponSystem)
-- [ ] 03-02-PLAN.md — Projectile visuals and wall collision with impact effects
-- [ ] 03-03-PLAN.md — Test targets and ammo pickups
-- [ ] 03-04-PLAN.md — Integration and verification checkpoint
+- [x] 03-01-PLAN.md — Core combat infrastructure (Projectile, ProjectileManager, AmmoSystem, WeaponSystem)
+- [x] 03-02-PLAN.md — Projectile visuals and wall collision with impact effects
+- [x] 03-03-PLAN.md — Test targets and ammo pickups
+- [x] 03-04-PLAN.md — Integration and verification checkpoint
 
 ### Phase 4: Player Health & Survival
 **Goal**: Player has health system and can die
@@ -164,7 +164,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation & Content Pipeline | 4/4 | Complete | 2026-02-01 |
 | 2. Player Movement & Camera | 4/4 | Complete | 2026-02-02 |
-| 3. Core Combat System | 0/4 | Planned | - |
+| 3. Core Combat System | 4/4 | Complete | 2026-02-02 |
 | 4. Player Health & Survival | 0/? | Not started | - |
 | 5. Enemy AI & Combat | 0/? | Not started | - |
 | 6. Room System & Progression | 0/? | Not started | - |

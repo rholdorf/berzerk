@@ -24,13 +24,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Combat System
 
-- [ ] **COMBAT-01**: Player can aim with mouse cursor
-- [ ] **COMBAT-02**: Player fires laser weapon on mouse click
-- [ ] **COMBAT-03**: Laser projectiles spawn and travel through 3D space
-- [ ] **COMBAT-04**: Projectile collision detection with enemies and walls
-- [ ] **COMBAT-05**: Ammunition system with limited ammo count
-- [ ] **COMBAT-06**: Ammo pickups spawn in room
-- [ ] **COMBAT-07**: Player can collect ammo pickups on collision
+- [x] **COMBAT-01**: Player can aim with mouse cursor
+- [x] **COMBAT-02**: Player fires laser weapon on mouse click
+- [x] **COMBAT-03**: Laser projectiles spawn and travel through 3D space
+- [x] **COMBAT-04**: Projectile collision detection with enemies and walls
+- [x] **COMBAT-05**: Ammunition system with limited ammo count
+- [x] **COMBAT-06**: Ammo pickups spawn in room
+- [x] **COMBAT-07**: Player can collect ammo pickups on collision
 
 ### Health & Damage
 
@@ -155,13 +155,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MOVE-03 | Phase 2 | Complete |
 | MOVE-04 | Phase 2 | Complete |
 | MOVE-05 | Phase 2 | Complete |
-| COMBAT-01 | Phase 3 | Pending |
-| COMBAT-02 | Phase 3 | Pending |
-| COMBAT-03 | Phase 3 | Pending |
-| COMBAT-04 | Phase 3 | Pending |
-| COMBAT-05 | Phase 3 | Pending |
-| COMBAT-06 | Phase 3 | Pending |
-| COMBAT-07 | Phase 3 | Pending |
+| COMBAT-01 | Phase 3 | Complete |
+| COMBAT-02 | Phase 3 | Complete |
+| COMBAT-03 | Phase 3 | Complete |
+| COMBAT-04 | Phase 3 | Complete |
+| COMBAT-05 | Phase 3 | Complete |
+| COMBAT-06 | Phase 3 | Complete |
+| COMBAT-07 | Phase 3 | Complete |
 | HEALTH-01 | Phase 4 | Pending |
 | HEALTH-02 | Phase 4 | Pending |
 | HEALTH-03 | Phase 4 | Pending |
