@@ -74,12 +74,8 @@ public class AnimatedModel
             _currentTime = TimeSpan.Zero;
         }
 
-        // For initial version, just copy default bone transforms
-        // Full keyframe interpolation can be added later
-        _model.CopyAbsoluteBoneTransformsTo(_boneTransforms);
-
-        // TODO: Implement keyframe interpolation and bone transform updates
-        // For now, this is a placeholder that keeps the model in default pose
+        // Apply keyframe animation to bones
+        ApplyKeyframes(clip);
     }
 
     /// <summary>
@@ -138,5 +134,93 @@ public class AnimatedModel
             return new List<string>();
 
         return _animationData.Clips.Keys.ToList();
+    }
+
+    /// <summary>
+    /// Applies keyframe animation to bone transforms.
+    /// Interpolates between keyframes based on current time.
+    /// </summary>
+    private void ApplyKeyframes(AnimationClip clip)
+    {
+        if (_model == null)
+            return;
+
+        // Start with default bone transforms
+        _model.CopyAbsoluteBoneTransformsTo(_boneTransforms);
+
+        // Apply keyframe transforms for each bone
+        foreach (var boneName in clip.Keyframes.Keys)
+        {
+            var keyframes = clip.Keyframes[boneName];
+            if (keyframes.Count == 0)
+                continue;
+
+            // Find the two keyframes to interpolate between
+            Keyframe? currentFrame = null;
+            Keyframe? nextFrame = null;
+
+            for (int i = 0; i < keyframes.Count; i++)
+            {
+                if (keyframes[i].Time <= _currentTime)
+                {
+                    currentFrame = keyframes[i];
+                    // Get next frame (wrap around to first frame if at end)
+                    nextFrame = keyframes[(i + 1) % keyframes.Count];
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // If we found keyframes, apply interpolation
+            if (currentFrame != null && nextFrame != null)
+            {
+                Matrix transform;
+
+                // Calculate interpolation factor
+                TimeSpan frameDuration = nextFrame.Time - currentFrame.Time;
+                if (frameDuration.TotalSeconds > 0)
+                {
+                    float t = (float)((_currentTime - currentFrame.Time).TotalSeconds / frameDuration.TotalSeconds);
+                    t = MathHelper.Clamp(t, 0f, 1f);
+
+                    // Interpolate between keyframes
+                    transform = InterpolateTransform(currentFrame.Transform, nextFrame.Transform, t);
+                }
+                else
+                {
+                    transform = currentFrame.Transform;
+                }
+
+                // Apply transform to bone
+                int boneIndex = currentFrame.BoneIndex;
+                if (boneIndex >= 0 && boneIndex < _boneTransforms.Length)
+                {
+                    _boneTransforms[boneIndex] = transform;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Interpolates between two transformation matrices.
+    /// Decomposes matrices, interpolates components, and recomposes.
+    /// </summary>
+    private Matrix InterpolateTransform(Matrix from, Matrix to, float t)
+    {
+        // Decompose matrices
+        from.Decompose(out Vector3 fromScale, out Quaternion fromRotation, out Vector3 fromTranslation);
+        to.Decompose(out Vector3 toScale, out Quaternion toRotation, out Vector3 toTranslation);
+
+        // Interpolate components
+        Vector3 scale = Vector3.Lerp(fromScale, toScale, t);
+        Quaternion rotation = Quaternion.Slerp(fromRotation, toRotation, t);
+        Vector3 translation = Vector3.Lerp(fromTranslation, toTranslation, t);
+
+        // Recompose matrix
+        return Matrix.CreateScale(scale) *
+               Matrix.CreateFromQuaternion(rotation) *
+               Matrix.CreateTranslation(translation);
     }
 }
