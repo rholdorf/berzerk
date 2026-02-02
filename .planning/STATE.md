@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 ## Current Position
 
 Phase: 2 of 8 (Player Movement & Camera)
-Plan: 2 of ? in current phase
+Plan: 3 of ? in current phase
 Status: In progress
-Last activity: 2026-02-02 — Completed 02-02-PLAN.md (Player Controller with WASD Movement)
+Last activity: 2026-02-02 — Completed 02-03-PLAN.md (Third-Person Camera)
 
-Progress: [█░░░░░░░░░] 12.5% (1 of 8 phases complete, 6 total plans)
+Progress: [█░░░░░░░░░] 12.5% (1 of 8 phases complete, 7 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 28.4 min
-- Total execution time: 2.83 hours
+- Total plans completed: 7
+- Average duration: 24.7 min
+- Total execution time: 2.88 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 - Foundation & Content Pipeline | 4 | 161.1 min | 40.3 min |
-| 02 - Player Movement & Camera | 2 | 3.0 min | 1.5 min |
+| 02 - Player Movement & Camera | 3 | 5.0 min | 1.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (2.1 min), 01-04 (151 min), 02-01 (1.0 min), 02-02 (2.0 min)
+- Last 5 plans: 01-04 (151 min), 02-01 (1.0 min), 02-02 (2.0 min), 02-03 (2.0 min)
 - Trend: Phase 2 plans executing quickly on established foundation
 
 *Updated after each plan completion*
@@ -64,6 +64,12 @@ Recent decisions affecting current work:
 - 02-02: Player rotates to face movement direction, not cursor (arcade third-person action)
 - 02-02: Smooth rotation using quaternion slerp with exponential smoothing
 - 02-02: Temporary camera offset (0, 100, 200) follows player from behind/above
+- 02-03: Exponential decay smoothing (1 - Pow(damping, deltaTime)) for frame-rate independence
+- 02-03: Scroll wheel: positive delta = zoom in (decrease distance)
+- 02-03: Right-click drag for camera orbit (common third-person pattern)
+- 02-03: Auto pitch transition based on distance: eye-level close, high angle far
+- 02-03: Collision detection with Ray.Intersects against BoundingBox list
+- 02-03: Smooth zoom-in on collision, smooth zoom-out when collision clears
 
 ### Pending Todos
 
@@ -89,10 +95,10 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-02 (plan execution)
-Stopped at: Completed 02-02-PLAN.md (Player Controller with WASD Movement)
+Stopped at: Completed 02-03-PLAN.md (Third-Person Camera)
 Resume file: None
 
-**Phase 2 Progress:** PlayerController with WASD movement working. Camera temporarily follows player. Next: proper ThirdPersonCamera implementation.
+**Phase 2 Progress:** ThirdPersonCamera complete with smooth following, zoom, orbit, collision detection, and angle transitions. PlayerController has WASD movement. Next: integrate camera into BerzerkGame.
 
 ---
 *State initialized: 2026-01-31*
