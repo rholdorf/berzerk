@@ -90,6 +90,11 @@ public class ThirdPersonCamera
         float finalDistance = CheckCollision(_target.Position, desiredPosition);
         Vector3 collisionAdjustedPosition = _target.Position + GetOffsetAtDistance(finalDistance);
 
+        if (finalDistance != _currentDistance)
+        {
+            Console.WriteLine($"Update: Collision adjustment applied - finalDistance={finalDistance}, currentDistance={_currentDistance}");
+        }
+
         // 6. Smooth camera position (exponential decay lerp)
         float smoothFactor = 1f - MathF.Pow(PositionDamping, deltaTime);
         _currentPosition = Vector3.Lerp(_currentPosition, collisionAdjustedPosition, smoothFactor);
@@ -185,10 +190,13 @@ public class ThirdPersonCamera
             float? intersection = ray.Intersects(box);
             if (intersection.HasValue && intersection.Value > 0 && intersection.Value < closestHit)
             {
+                Console.WriteLine($"Collision detected at distance {intersection.Value}");
                 closestHit = intersection.Value;
                 hitDetected = true;
             }
         }
+
+        Console.WriteLine($"CheckCollision: hitDetected={hitDetected}, closestHit={closestHit}, desiredDistance={desiredDistance}");
 
         // Only apply collision if we actually hit something
         if (!hitDetected)
