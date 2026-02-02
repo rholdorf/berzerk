@@ -6,6 +6,7 @@ using Berzerk.Graphics;
 using Berzerk.Source.Graphics;
 using Berzerk.Controllers;
 using Berzerk.UI;
+using Berzerk.Source.Combat;
 using System;
 using System.Collections.Generic;
 
@@ -21,6 +22,13 @@ public class BerzerkGame : Game
     private Crosshair _crosshair;
     private List<BoundingBox> _testWalls;
     private DebugRenderer _debugRenderer;
+
+    // Combat systems
+    private ProjectileManager _projectileManager;
+    private ProjectileRenderer _projectileRenderer;
+    private AmmoSystem _ammoSystem;
+    private WeaponSystem _weaponSystem;
+    private TargetManager _targetManager;
 
     // Test animated model and animations
     private AnimatedModel _testCharacter;
@@ -47,6 +55,14 @@ public class BerzerkGame : Game
         // Initialize camera and crosshair
         _camera = new ThirdPersonCamera(_inputManager, _playerController.Transform, _playerController);
         _crosshair = new Crosshair();
+
+        // Initialize combat systems
+        _projectileManager = new ProjectileManager();
+        _projectileManager.Initialize(50);
+        _ammoSystem = new AmmoSystem();
+        _weaponSystem = new WeaponSystem(_ammoSystem, _projectileManager);
+        _targetManager = new TargetManager();
+        _targetManager.Initialize();
 
         base.Initialize();
     }
@@ -84,13 +100,19 @@ public class BerzerkGame : Game
         // Set up test collision walls
         _testWalls = ThirdPersonCamera.CreateTestWalls();
         _camera.SetCollisionGeometry(_testWalls);
+        _projectileManager.SetWallColliders(_testWalls);
         Console.WriteLine($"Camera collision geometry initialized with {_testWalls.Count} boxes");
 
+        // Initialize projectile renderer after graphics device is ready
+        _projectileRenderer = new ProjectileRenderer(GraphicsDevice);
+
         Console.WriteLine("\n=== Controls ===");
-        Console.WriteLine("WASD: Move player");
+        Console.WriteLine("WASD/QE: Move player (tank controls)");
         Console.WriteLine("Mouse: Aim (crosshair)");
+        Console.WriteLine("Left Mouse: Fire (hold for auto-fire)");
         Console.WriteLine("Right-click + drag: Orbit camera");
         Console.WriteLine("Scroll wheel: Zoom camera");
+        Console.WriteLine("R: Respawn targets");
         Console.WriteLine("1/2/3: Switch animations");
         Console.WriteLine("Escape: Exit");
         Console.WriteLine("================\n");
@@ -107,9 +129,28 @@ public class BerzerkGame : Game
         // Update camera
         _camera.Update(gameTime);
 
+        // Combat update
+        bool isFiring = _inputManager.IsLeftMouseHeld();
+        Vector3 spawnPos = _playerController.Transform.Position + Vector3.Up * 1.5f; // Shoulder height
+        Vector3 aimDir = _camera.Forward;
+        _weaponSystem.Update(gameTime, isFiring, spawnPos, aimDir);
+
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _projectileManager.Update(deltaTime);
+        _targetManager.Update(deltaTime);
+        _targetManager.CheckProjectileCollisions(_projectileManager.GetActiveProjectiles());
+        _targetManager.CheckPickupCollection(_playerController.Transform.Position, _ammoSystem);
+
         // Test: Escape key exits game
         if (_inputManager.IsKeyPressed(Keys.Escape))
             Exit();
+
+        // R key respawns targets for testing
+        if (_inputManager.IsKeyPressed(Keys.R))
+        {
+            _targetManager.RespawnTargets();
+            Console.WriteLine("Targets respawned!");
+        }
 
         // Animation switching using keyboard input
         if (_inputManager.IsKeyPressed(Keys.D1))
@@ -158,6 +199,12 @@ public class BerzerkGame : Game
 
         // Draw collision walls
         _debugRenderer.DrawBoundingBoxes(_testWalls, _camera.ViewMatrix, _camera.ProjectionMatrix, Color.White);
+
+        // Draw combat elements
+        _projectileRenderer.Draw(_projectileManager.GetActiveProjectiles(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+        _projectileRenderer.DrawEffects(_projectileManager.GetActiveEffects(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+        _debugRenderer.DrawTargets(_targetManager.GetTargets(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+        _debugRenderer.DrawPickups(_targetManager.GetPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
 
         // Draw 3D content with camera matrices
         // Scale down model by 0.01x - Mixamo models are typically 100x too large
