@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 Phase: 3 of 8 IN PROGRESS (Core Combat System)
 Plan: 03 of 4 complete in Phase 3
 Status: Phase 3 in progress
-Last activity: 2026-02-02 — Completed 03-03-PLAN.md (Test targets and ammo pickups)
+Last activity: 2026-02-02 — Completed 03-02-PLAN.md (Projectile rendering and collision) Task 3
 
 Progress: [███░░░░░░░] 32% (14 of 44 total plans complete across all phases)
 
@@ -29,10 +29,10 @@ Progress: [███░░░░░░░] 32% (14 of 44 total plans complete ac
 |-------|-------|-------|----------|
 | 01 - Foundation & Content Pipeline | 4 | 161.1 min | 40.3 min |
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
-| 03 - Core Combat System | 3 | 6.0 min | 2.0 min |
+| 03 - Core Combat System | 3 | 8.0 min | 2.7 min |
 | **Phase 3 breakdown** | | | |
 | 03-01 (Core Infrastructure) | 1 | 2.0 min | 2.0 min |
-| 03-02 (Projectile Visuals) | 1 | 2.0 min | 2.0 min |
+| 03-02 (Projectile Visuals) | 1 | 4.0 min | 4.0 min |
 | 03-03 (Test Targets) | 1 | 2.0 min | 2.0 min |
 
 **Recent Trend:**
@@ -87,10 +87,11 @@ Recent decisions affecting current work:
 - 03-01: Fire rate 6.5 shots/sec, projectile speed 50 units/sec (middle of CONTEXT ranges)
 - 03-01: Magazine 25 rounds + reserve 125 rounds with auto-reload
 - 03-01: Frame-rate independent cooldown using GameTime.ElapsedGameTime.TotalSeconds
-- 03-02: Projectile sphere radius 0.15f, impact effect sphere 0.3f with scale-down animation
-- 03-02: Cyan emissive projectiles (0.2,0.8,1.0), yellow impact flashes (1.0,0.9,0.3)
-- 03-02: Impact effects last 0.15s with scale-down for quick visual feedback
-- 03-02: DebugRenderer extended with DrawSphere() using cached sphere geometry
+- 03-02: 8-segment UV sphere mesh for low-poly arcade aesthetic
+- 03-02: Cyan emissive (0.3, 0.9, 1.0) for projectiles, orange (1.0, 0.8, 0.3) for impacts
+- 03-02: Impact effects last 0.2s with fade and shrink animation
+- 03-02: Wall collision via BoundingSphere.Intersects(BoundingBox) after projectile movement
+- 03-02: Pre-allocate 20 impact effects in pool to prevent GC spikes
 - 03-03: Test targets at fixed positions with 1-hit destruction for arcade feel
 - 03-03: Target collision radius 0.7f (smaller than cube diagonal for balanced hit detection)
 - 03-03: Hit flash 0.1s, color changes Green→Red→Transparent
@@ -122,11 +123,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 03-03-PLAN.md (Test targets and ammo pickups)
+Stopped at: Completed 03-02-PLAN.md Task 3 (impact effect rendering)
 Resume file: None
 
-**Phase 3 Progress:** Combat system 75% complete (3 of 4 plans). Projectile infrastructure with object pooling, ammo system with magazine+reserve, visual rendering with glowing spheres and impact effects, test targets with hit feedback, and ammo pickups with auto-collect all implemented. Ready for Plan 04 (integration into game loop with player shooting, target collision, and pickup collection).
+**Phase 3 Progress:** Combat system 75% complete (3 of 4 plans). Projectile infrastructure with object pooling, ammo system with magazine+reserve, visual rendering with glowing spheres using UV mesh generation and BasicEffect emissive, wall collision detection with impact effects, test targets with hit feedback, and ammo pickups with auto-collect all implemented. Ready for Plan 04 (integration into game loop with player shooting, target collision, and pickup collection).
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-02 (03-03 complete)*
+*Last updated: 2026-02-02 (03-02 complete)*
