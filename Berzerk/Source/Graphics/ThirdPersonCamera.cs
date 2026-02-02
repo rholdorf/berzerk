@@ -198,16 +198,18 @@ public class ThirdPersonCamera
 
         Console.WriteLine($"CheckCollision: hitDetected={hitDetected}, closestHit={closestHit}, desiredDistance={desiredDistance}");
 
-        // Only apply collision if we actually hit something
+        // If no collision detected, allow camera to move to desired distance
         if (!hitDetected)
-            return _currentDistance;
+        {
+            return desiredDistance;
+        }
 
         // Apply collision offset (don't clip exactly at surface)
-        float finalDistance = MathF.Max(closestHit - CollisionOffset, MinDistance);
+        float collisionDistance = MathF.Max(closestHit - CollisionOffset, MinDistance);
 
         // Smooth zoom back out when collision clears
         float distanceSmoothFactor = 1f - MathF.Pow(DistanceDamping, 0.016f); // Assume ~60fps for distance smooth
-        return MathHelper.Lerp(_currentDistance, finalDistance, distanceSmoothFactor);
+        return MathHelper.Lerp(_currentDistance, collisionDistance, distanceSmoothFactor);
     }
 
     /// <summary>
