@@ -88,6 +88,13 @@ public class AnimatedModel
 
         foreach (var mesh in _model.Meshes)
         {
+            // Skip debug geometry (spheres at joints)
+            string meshName = mesh.Name.ToLower();
+            if (meshName.Contains("sphere") || meshName.Contains("joint") || meshName.Contains("debug"))
+            {
+                continue;
+            }
+
             foreach (BasicEffect effect in mesh.Effects)
             {
                 effect.World = _boneTransforms[mesh.ParentBone.Index] * world;
