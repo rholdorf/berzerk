@@ -10,28 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 ## Current Position
 
 Phase: 2 of 8 (Player Movement & Camera)
-Plan: 0 of ? in current phase (not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-01 — Phase 1 complete, ready for Phase 2
+Plan: 1 of ? in current phase
+Status: In progress
+Last activity: 2026-02-01 — Completed 02-01-PLAN.md (Input & Transform Foundation)
 
-Progress: [█░░░░░░░░░] 12.5% (1 of 8 phases complete)
+Progress: [█░░░░░░░░░] 12.5% (1 of 8 phases complete, 5 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 40.3 min
-- Total execution time: 2.68 hours
+- Total plans completed: 5
+- Average duration: 32.5 min
+- Total execution time: 2.70 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 - Foundation & Content Pipeline | 4 | 161.1 min | 40.3 min |
+| 02 - Player Movement & Camera | 1 | 1.0 min | 1.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3.1 min), 01-02 (2.5 min), 01-03 (2.1 min), 01-04 (151 min)
-- Trend: 01-04 was integration/validation plan with checkpoint (longer expected)
+- Last 5 plans: 01-02 (2.5 min), 01-03 (2.1 min), 01-04 (151 min), 02-01 (1.0 min)
+- Trend: Quick foundation tasks, 02-01 simple extension work
 
 *Updated after each plan completion*
 
@@ -55,6 +56,10 @@ Recent decisions affecting current work:
 - 01-04: BasicEffect rendering for Phase 1 validation (defer skinned animation)
 - 01-04: Separate FBX files per animation (Mixamo export limitation)
 - 01-04: Camera at (0,1,3) for model viewing (standard 3D preview position)
+- 02-01: ScrollWheelValue is cumulative - calculate per-frame delta (MonoGame behavior)
+- 02-01: Separate held vs pressed detection for mouse buttons (continuous vs edge)
+- 02-01: Transform uses Quaternion for rotation (prevent gimbal lock)
+- 02-01: Transform provides derived direction vectors as properties (Forward/Right/Up)
 
 ### Pending Todos
 
@@ -80,10 +85,10 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-01 (plan execution)
-Stopped at: Completed 01-04-PLAN.md (Phase 1 complete - animation runtime and test integration)
+Stopped at: Completed 02-01-PLAN.md (Input & Transform Foundation)
 Resume file: None
 
-**Phase 1 Complete:** Foundation validated end-to-end (content pipeline, input, rendering). Ready for Phase 2.
+**Phase 2 Started:** InputManager extended with camera controls, Transform component ready for player and camera.
 
 ---
 *State initialized: 2026-01-31*
