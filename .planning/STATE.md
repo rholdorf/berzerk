@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 ## Current Position
 
 Phase: 3 of 8 IN PROGRESS (Core Combat System)
-Plan: 01 of 4 complete in Phase 3
+Plan: 03 of 4 complete in Phase 3
 Status: Phase 3 in progress
-Last activity: 2026-02-02 — Completed 03-01-PLAN.md (Core combat infrastructure)
+Last activity: 2026-02-02 — Completed 03-03-PLAN.md (Test targets and ammo pickups)
 
-Progress: [██░░░░░░░░] 27% (12 of 44 total plans complete across all phases)
+Progress: [███░░░░░░░] 32% (14 of 44 total plans complete across all phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 27.0 min
-- Total execution time: 5.19 hours
+- Total plans completed: 14
+- Average duration: 23.5 min
+- Total execution time: 5.32 hours
 
 **By Phase:**
 
@@ -29,13 +29,15 @@ Progress: [██░░░░░░░░] 27% (12 of 44 total plans complete ac
 |-------|-------|-------|----------|
 | 01 - Foundation & Content Pipeline | 4 | 161.1 min | 40.3 min |
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
-| 03 - Core Combat System | 1 | 2.0 min | 2.0 min |
+| 03 - Core Combat System | 3 | 6.0 min | 2.0 min |
 | **Phase 3 breakdown** | | | |
 | 03-01 (Core Infrastructure) | 1 | 2.0 min | 2.0 min |
+| 03-02 (Projectile Visuals) | 1 | 2.0 min | 2.0 min |
+| 03-03 (Test Targets) | 1 | 2.0 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (2 min), 02-03 (2 min), 02-04 (955 min), 03-01 (2 min)
-- Trend: Pure code generation plans very fast (1-2 min), integration/validation plans slower
+- Last 5 plans: 02-03 (2 min), 02-04 (955 min), 03-01 (2 min), 03-02 (2 min), 03-03 (2 min)
+- Trend: Pure code generation plans very fast (2 min), integration/validation plans slower
 
 *Updated after each plan completion*
 
@@ -85,6 +87,16 @@ Recent decisions affecting current work:
 - 03-01: Fire rate 6.5 shots/sec, projectile speed 50 units/sec (middle of CONTEXT ranges)
 - 03-01: Magazine 25 rounds + reserve 125 rounds with auto-reload
 - 03-01: Frame-rate independent cooldown using GameTime.ElapsedGameTime.TotalSeconds
+- 03-02: Projectile sphere radius 0.15f, impact effect sphere 0.3f with scale-down animation
+- 03-02: Cyan emissive projectiles (0.2,0.8,1.0), yellow impact flashes (1.0,0.9,0.3)
+- 03-02: Impact effects last 0.15s with scale-down for quick visual feedback
+- 03-02: DebugRenderer extended with DrawSphere() using cached sphere geometry
+- 03-03: Test targets at fixed positions with 1-hit destruction for arcade feel
+- 03-03: Target collision radius 0.7f (smaller than cube diagonal for balanced hit detection)
+- 03-03: Hit flash 0.1s, color changes Green→Red→Transparent
+- 03-03: AmmoPickup amount 40, auto-collect radius 2f (generous arcade forgiveness)
+- 03-03: Bobbing animation for pickups using sin(time * speed) * height
+- 03-03: Pickup pooling (size 10) handles multiple target destructions without GC
 
 ### Pending Todos
 
@@ -110,11 +122,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 03-01-PLAN.md (Core combat infrastructure)
+Stopped at: Completed 03-03-PLAN.md (Test targets and ammo pickups)
 Resume file: None
 
-**Phase 3 Progress:** Combat namespace created with Projectile, ProjectileManager, AmmoSystem, and WeaponSystem. Object pooling implemented (50 projectiles pre-allocated). Magazine+reserve ammo system with auto-reload. Fire rate limiting (6.5 shots/sec) with frame-rate independent timing. Ready for Plan 02 (projectile visuals and wall collision).
+**Phase 3 Progress:** Combat system 75% complete (3 of 4 plans). Projectile infrastructure with object pooling, ammo system with magazine+reserve, visual rendering with glowing spheres and impact effects, test targets with hit feedback, and ammo pickups with auto-collect all implemented. Ready for Plan 04 (integration into game loop with player shooting, target collision, and pickup collection).
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-02 (03-01 complete)*
+*Last updated: 2026-02-02 (03-03 complete)*
