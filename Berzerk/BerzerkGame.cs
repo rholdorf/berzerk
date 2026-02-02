@@ -164,6 +164,7 @@ public class BerzerkGame : Game
         Matrix worldMatrix = modelScale * _playerController.Transform.WorldMatrix;
 
         _currentModel?.Draw(
+            GraphicsDevice,
             worldMatrix,
             _camera.ViewMatrix,
             _camera.ProjectionMatrix

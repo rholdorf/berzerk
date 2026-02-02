@@ -81,10 +81,17 @@ public class AnimatedModel
     /// <summary>
     /// Draws the model with current bone transforms.
     /// </summary>
-    public void Draw(Matrix world, Matrix view, Matrix projection)
+    public void Draw(GraphicsDevice graphicsDevice, Matrix world, Matrix view, Matrix projection)
     {
         if (_model == null)
             return;
+
+        // Enable backface culling to prevent inside-out rendering
+        RasterizerState rasterizerState = new RasterizerState
+        {
+            CullMode = CullMode.CullCounterClockwiseFace
+        };
+        graphicsDevice.RasterizerState = rasterizerState;
 
         foreach (var mesh in _model.Meshes)
         {
