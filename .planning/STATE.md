@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 ## Current Position
 
 Phase: 2 of 8 (Player Movement & Camera)
-Plan: 1 of ? in current phase
+Plan: 2 of ? in current phase
 Status: In progress
-Last activity: 2026-02-01 — Completed 02-01-PLAN.md (Input & Transform Foundation)
+Last activity: 2026-02-02 — Completed 02-02-PLAN.md (Player Controller with WASD Movement)
 
-Progress: [█░░░░░░░░░] 12.5% (1 of 8 phases complete, 5 total plans)
+Progress: [█░░░░░░░░░] 12.5% (1 of 8 phases complete, 6 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 32.5 min
-- Total execution time: 2.70 hours
+- Total plans completed: 6
+- Average duration: 28.4 min
+- Total execution time: 2.83 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 - Foundation & Content Pipeline | 4 | 161.1 min | 40.3 min |
-| 02 - Player Movement & Camera | 1 | 1.0 min | 1.0 min |
+| 02 - Player Movement & Camera | 2 | 3.0 min | 1.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (2.5 min), 01-03 (2.1 min), 01-04 (151 min), 02-01 (1.0 min)
-- Trend: Quick foundation tasks, 02-01 simple extension work
+- Last 5 plans: 01-03 (2.1 min), 01-04 (151 min), 02-01 (1.0 min), 02-02 (2.0 min)
+- Trend: Phase 2 plans executing quickly on established foundation
 
 *Updated after each plan completion*
 
@@ -60,6 +60,10 @@ Recent decisions affecting current work:
 - 02-01: Separate held vs pressed detection for mouse buttons (continuous vs edge)
 - 02-01: Transform uses Quaternion for rotation (prevent gimbal lock)
 - 02-01: Transform provides derived direction vectors as properties (Forward/Right/Up)
+- 02-02: MoveSpeed 5 units/sec, Acceleration 20f, Deceleration 15f (snappy arcade feel)
+- 02-02: Player rotates to face movement direction, not cursor (arcade third-person action)
+- 02-02: Smooth rotation using quaternion slerp with exponential smoothing
+- 02-02: Temporary camera offset (0, 100, 200) follows player from behind/above
 
 ### Pending Todos
 
@@ -84,12 +88,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 (plan execution)
-Stopped at: Completed 02-01-PLAN.md (Input & Transform Foundation)
+Last session: 2026-02-02 (plan execution)
+Stopped at: Completed 02-02-PLAN.md (Player Controller with WASD Movement)
 Resume file: None
 
-**Phase 2 Started:** InputManager extended with camera controls, Transform component ready for player and camera.
+**Phase 2 Progress:** PlayerController with WASD movement working. Camera temporarily follows player. Next: proper ThirdPersonCamera implementation.
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-01*
+*Last updated: 2026-02-02*
