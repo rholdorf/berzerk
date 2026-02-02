@@ -84,6 +84,7 @@ public class BerzerkGame : Game
         // Set up test collision walls
         _testWalls = ThirdPersonCamera.CreateTestWalls();
         _camera.SetCollisionGeometry(_testWalls);
+        Console.WriteLine($"Camera collision geometry initialized with {_testWalls.Count} boxes");
 
         Console.WriteLine("\n=== Controls ===");
         Console.WriteLine("WASD: Move player");
