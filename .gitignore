@@ -1,0 +1,47 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# MonoGame content build
+Content/bin/
+Content/obj/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Compiled executables and libraries
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# Temporary files
+*.tmp
+*.temp
+*~
