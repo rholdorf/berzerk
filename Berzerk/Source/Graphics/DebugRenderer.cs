@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using Berzerk.Source.Combat;
 
 namespace Berzerk.Source.Graphics;
 
@@ -113,6 +114,44 @@ public class DebugRenderer
         foreach (var box in boxes)
         {
             DrawBoundingBox(box, view, projection, color);
+        }
+    }
+
+    /// <summary>
+    /// Draw test targets as colored cubes with hit feedback.
+    /// </summary>
+    public void DrawTargets(IReadOnlyList<TestTarget> targets, Matrix view, Matrix projection)
+    {
+        foreach (var target in targets)
+        {
+            if (target.IsActive)
+            {
+                BoundingBox box = target.GetBoundingBox();
+                Color color = target.GetColor();
+                DrawBoundingBox(box, view, projection, color);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Draw ammo pickups as floating yellow boxes.
+    /// </summary>
+    public void DrawPickups(IReadOnlyList<AmmoPickup> pickups, Matrix view, Matrix projection)
+    {
+        foreach (var pickup in pickups)
+        {
+            if (pickup.IsActive)
+            {
+                Vector3 displayPos = pickup.GetDisplayPosition();
+                // Create small box around pickup position
+                float size = 0.2f; // Small pickup box
+                BoundingBox box = new BoundingBox(
+                    displayPos - new Vector3(size),
+                    displayPos + new Vector3(size)
+                );
+                Color color = pickup.GetColor();
+                DrawBoundingBox(box, view, projection, color);
+            }
         }
     }
 }
