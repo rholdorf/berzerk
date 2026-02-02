@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Berzerk.Source.Input;
 using Berzerk.Graphics;
+using Berzerk.Controllers;
 using System;
 
 namespace Berzerk;
@@ -12,6 +13,7 @@ public class BerzerkGame : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private InputManager _inputManager;
+    private PlayerController _playerController;
 
     // Test animated model and animations
     private AnimatedModel _testCharacter;
@@ -35,6 +37,9 @@ public class BerzerkGame : Game
     {
         // Initialize input manager
         _inputManager = new InputManager();
+
+        // Initialize player controller
+        _playerController = new PlayerController(_inputManager);
 
         base.Initialize();
     }
@@ -79,6 +84,7 @@ public class BerzerkGame : Game
         );
 
         Console.WriteLine("\n=== Animation Test Controls ===");
+        Console.WriteLine("WASD: Move player");
         Console.WriteLine("Press 1: Play idle animation");
         Console.WriteLine("Press 2: Play walk animation");
         Console.WriteLine("Press 3: Play run animation");
@@ -90,6 +96,9 @@ public class BerzerkGame : Game
     {
         // Update input state at start of frame
         _inputManager.Update();
+
+        // Update player controller
+        _playerController.Update(gameTime);
 
         // Test: Escape key exits game
         if (_inputManager.IsKeyPressed(Keys.Escape))
@@ -137,8 +146,17 @@ public class BerzerkGame : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // Draw the current animated model
-        _currentModel?.Draw(Matrix.Identity, _viewMatrix, _projectionMatrix);
+        // Temporary: Update camera to follow player
+        Vector3 cameraOffset = new Vector3(0, 100, 200);
+        Vector3 cameraPos = _playerController.Transform.Position + cameraOffset;
+        _viewMatrix = Matrix.CreateLookAt(
+            cameraPos,
+            _playerController.Transform.Position + new Vector3(0, 50, 0),
+            Vector3.Up
+        );
+
+        // Draw the current animated model at player position
+        _currentModel?.Draw(_playerController.Transform.WorldMatrix, _viewMatrix, _projectionMatrix);
 
         base.Draw(gameTime);
     }
