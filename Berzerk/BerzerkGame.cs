@@ -160,8 +160,10 @@ public class BerzerkGame : Game
 
         // Draw 3D content with camera matrices
         // Scale down model by 0.01x - Mixamo models are typically 100x too large
+        // Mixamo models face +Z, but we want them to face -Z (forward in MonoGame)
         Matrix modelScale = Matrix.CreateScale(0.01f);
-        Matrix worldMatrix = modelScale * _playerController.Transform.WorldMatrix;
+        Matrix modelRotationCorrection = Matrix.CreateRotationY(MathHelper.Pi); // 180 degree turn
+        Matrix worldMatrix = modelScale * modelRotationCorrection * _playerController.Transform.WorldMatrix;
 
         _currentModel?.Draw(
             GraphicsDevice,
