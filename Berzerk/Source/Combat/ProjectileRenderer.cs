@@ -127,4 +127,39 @@ public class ProjectileRenderer
             }
         }
     }
+
+    /// <summary>
+    /// Draw impact effects as fading orange spheres.
+    /// </summary>
+    public void DrawEffects(IReadOnlyList<ImpactEffect> effects, Matrix view, Matrix projection)
+    {
+        _effect.View = view;
+        _effect.Projection = projection;
+
+        foreach (var effect in effects)
+        {
+            if (!effect.IsActive) continue;
+
+            // Create world matrix with scaling based on effect lifetime
+            _effect.World = Matrix.CreateScale(effect.Scale) *
+                           Matrix.CreateTranslation(effect.Position);
+
+            // Orange/yellow fading glow
+            _effect.EmissiveColor = new Vector3(1.0f, 0.8f, 0.3f) * effect.Alpha;
+
+            // Draw same sphere mesh
+            foreach (EffectPass pass in _effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                _graphicsDevice.DrawUserIndexedPrimitives(
+                    PrimitiveType.TriangleList,
+                    _sphereVertices, 0, _sphereVertices.Length,
+                    _sphereIndices, 0, _sphereIndices.Length / 3
+                );
+            }
+        }
+
+        // Reset to cyan for next projectile draw
+        _effect.EmissiveColor = new Vector3(0.3f, 0.9f, 1.0f);
+    }
 }
