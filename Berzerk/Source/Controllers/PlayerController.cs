@@ -13,6 +13,7 @@ namespace Berzerk.Controllers;
 public class PlayerController
 {
     public Transform Transform { get; }
+    public bool IsEnabled { get; set; } = true;
 
     // Movement settings
     private const float MoveSpeed = 5f;        // Units per second
@@ -33,6 +34,8 @@ public class PlayerController
 
     public void Update(GameTime gameTime)
     {
+        if (!IsEnabled) return;
+
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         // 1. Handle rotation input (A/D keys)
