@@ -100,15 +100,19 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Robot enemies spawn in room using Mixamo models
   2. Robots detect player within proximity range and pursue
-  3. Robots navigate toward player using pathfinding (not straight-line)
+  3. Robots navigate toward player (direct movement per CONTEXT - pathfinding not required for single-room arcade)
   4. Robots attack player on melee contact, dealing damage
   5. Robots are destroyed when hit by laser projectiles
-  6. Destroyed robots play death animation, disappear, and award score points
+  6. Destroyed robots play death animation and disappear (score points deferred per CONTEXT to Phase 7)
   7. Robot animations play correctly (walk when moving, attack during melee, death when destroyed)
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] TBD (to be planned in /gsd:plan-phase 5)
+- [x] 05-01-PLAN.md — Core enemy infrastructure (EnemyController, EnemyHealth, HealthPickup)
+- [x] 05-02-PLAN.md — Enemy manager and pickup integration
+- [x] 05-03-PLAN.md — Enemy visual components (ExplosionEffect, EnemyRenderer)
+- [x] 05-04-PLAN.md — Enemy system integration into BerzerkGame
+- [ ] 05-05-PLAN.md — Gap closure: Animated robot models and documentation update
 
 ### Phase 6: Room System & Progression
 **Goal**: Player navigates through connected rooms with door progression
@@ -168,7 +172,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Player Movement & Camera | 4/4 | Complete | 2026-02-02 |
 | 3. Core Combat System | 4/4 | Complete | 2026-02-02 |
 | 4. Player Health & Survival | 3/3 | Complete | 2026-02-03 |
-| 5. Enemy AI & Combat | 0/? | Not started | - |
+| 5. Enemy AI & Combat | 4/5 | Gap closure | - |
 | 6. Room System & Progression | 0/? | Not started | - |
 | 7. UI & HUD | 0/? | Not started | - |
 | 8. Animation & Visual Polish | 0/? | Not started | - |
