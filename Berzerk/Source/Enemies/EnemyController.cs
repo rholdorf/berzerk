@@ -177,8 +177,16 @@ public class EnemyController
 
         if (_attackTimer <= 0f && distance <= AttackRange)
         {
-            // Deal damage (actual damage application will be handled by manager)
+            // Calculate knockback direction (from enemy to player)
+            Vector3 knockbackDir = playerPos - Transform.Position;
+            knockbackDir.Y = 0; // Horizontal only
+
+            // Fire attack event with damage and knockback direction
+            OnAttackPlayer?.Invoke(AttackDamage, knockbackDir);
+
+            // Legacy event for compatibility
             OnAttackExecuted?.Invoke(AttackDamage);
+
             _attackTimer = AttackCooldown;
         }
     }
@@ -226,6 +234,12 @@ public class EnemyController
     {
         TransitionToState(EnemyState.Dying);
     }
+
+    /// <summary>
+    /// Event fired when enemy executes an attack.
+    /// Passes damage amount and knockback direction (enemy to player).
+    /// </summary>
+    public event System.Action<int, Vector3>? OnAttackPlayer;
 
     /// <summary>
     /// Event fired when enemy executes an attack.
