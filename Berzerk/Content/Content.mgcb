@@ -37,3 +37,8 @@
 /processor:MixamoModelProcessor
 /build:Models/run.fbx
 
+#begin Font.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/build:Font.spritefont
+
