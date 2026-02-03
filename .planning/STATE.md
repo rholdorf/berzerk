@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 ## Current Position
 
 Phase: 5 of 8 IN PROGRESS (Enemy AI & Combat)
-Plan: 1 of 4 complete in Phase 5
-Status: Core enemy infrastructure complete
-Last activity: 2026-02-03 — Completed 05-01-PLAN.md (Core enemy infrastructure)
+Plan: 2 of 4 complete in Phase 5
+Status: Enemy manager and pickup integration complete
+Last activity: 2026-02-03 — Completed 05-02-PLAN.md (Enemy manager & pickup integration)
 
-Progress: [████████░░░░] 53% (4 phases complete + 1/4 of Phase 5, 16 of ~19 total plans)
+Progress: [█████████░░░] 58% (4 phases complete + 2/4 of Phase 5, 17 of ~19 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
-- Average duration: 19.8 min
-- Total execution time: 5.28 hours
+- Total plans completed: 17
+- Average duration: 18.6 min
+- Total execution time: 5.33 hours
 
 **By Phase:**
 
@@ -31,12 +31,13 @@ Progress: [████████░░░░] 53% (4 phases complete + 1/4 of
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
 | 03 - Core Combat System | 4 | 15.0 min | 3.8 min |
 | 04 - Player Health & Survival | 3 | 7.0 min | 2.3 min |
-| 05 - Enemy AI & Combat | 1 | 3.0 min | 3.0 min |
+| 05 - Enemy AI & Combat | 2 | 6.0 min | 3.0 min |
 | **Phase 5 breakdown** | | | |
 | 05-01 (Core Enemy Infrastructure) | 1 | 3.0 min | 3.0 min |
+| 05-02 (Enemy Manager & Pickup Integration) | 1 | 3.0 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (7 min), 04-01 (1 min), 04-02 (2 min), 04-03 (4 min), 05-01 (3 min)
+- Last 5 plans: 04-01 (1 min), 04-02 (2 min), 04-03 (4 min), 05-01 (3 min), 05-02 (3 min)
 - Trend: Pure code generation plans very fast (1-4 min), integration/validation plans vary (4-7 min)
 
 *Updated after each plan completion*
@@ -124,6 +125,12 @@ Recent decisions affecting current work:
 - 05-01: Direct movement toward player (no complex pathfinding for single-room arcade)
 - 05-01: Health pickup green color (universal health indicator), heals 25 HP
 - 05-01: Enemy FSM with Idle/Chase/Attack/Dying states, OnStateEnter/OnStateExit hooks
+- 05-02: Min spawn distance 10u from player (safe reaction time per CONTEXT)
+- 05-02: Min 3u between enemies to prevent spawn clustering
+- 05-02: Random spawn with 20 attempts, fallback to corner safe zones
+- 05-02: 35% drop chance (middle of 30-40% range), 50/50 ammo/health split
+- 05-02: Progressive difficulty: 2 + wave number, caps at 10 enemies max
+- 05-02: Health pickup pooling (size 10) mirrors ammo pickup pattern
 
 ### Pending Todos
 
@@ -149,11 +156,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 05-01-PLAN.md (Core enemy infrastructure)
+Stopped at: Completed 05-02-PLAN.md (Enemy manager & pickup integration)
 Resume file: None
 
-**Phase 5 Plan 01 Complete:** Core enemy infrastructure created. EnemyState FSM enum (Idle/Chase/Attack/Dying), EnemyHealth with OnDamageTaken/OnDeath events (30 HP max), EnemyController with state-based AI and movement (3.5 units/sec, detection 15 units, attack 2.5 units with hysteresis), and HealthPickup with green color and bobbing animation. All classes support pooling (Activate/Deactivate). Ready for Plan 02 - Enemy manager integration.
+**Phase 5 Plan 02 Complete:** Enemy manager with safe distance spawning (10u from player, 3u between enemies), object pooling (20 enemies), projectile collision detection (15 HP damage), 35% drop chance for ammo/health pickups, and progressive wave difficulty (2 + wave, caps at 10). TargetManager extended with health pickup pooling and CheckPickupCollection heals player. Ready for Plan 03 - Combat integration.
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-03 (Phase 5, Plan 01 complete)*
+*Last updated: 2026-02-03 (Phase 5, Plan 02 complete)*
