@@ -2,7 +2,7 @@
 
 A 3D reimagining of the classic 1980 arcade game Berzerk, built with MonoGame. Navigate procedurally generated maze rooms in third-person perspective, battling hostile robots with a laser weapon.
 
-**WARNING**: This is a Work In Progress toy-project. Vibe coding with [Claude Code](https://claude.com/product/claude-code) and [GSD](https://github.com/glittercowboy/get-shit-done).
+**WARNING**: This is a Work In Progress toy-project. Vibe coding with [Claude Code](https://claude.com/product/claude-code) and [GSD](https://github.com/glittercowboy/get-shit-done). GSD and CC do their thing in the background while I'm doing my things IRL.
 
 ## About
 

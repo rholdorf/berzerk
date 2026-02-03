@@ -35,7 +35,7 @@ Robot enemies that spawn in the room, detect and pursue the player, attack on me
 - Robôs levam 2-3 hits de laser para serem destruídos (mais satisfatório que 1-hit)
 - Dropam munição e health pickups (não score por enquanto)
 - Chance média de drop: 30-40% (gerenciamento de recursos importante)
-- Efeito visual: Flash e desaparecem (simples, limpo, arcade)
+- Efeito visual: Flash e explodem (simples, esfera que expande e some)
 
 ### Claude's Discretion
 - Algoritmo exato de pathfinding (linha reta vs navmesh vs A*)
