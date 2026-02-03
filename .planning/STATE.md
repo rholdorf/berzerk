@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 ## Current Position
 
 Phase: 5 of 8 IN PROGRESS (Enemy AI & Combat)
-Plan: 2 of 4 complete in Phase 5
-Status: Enemy manager and pickup integration complete
-Last activity: 2026-02-03 — Completed 05-02-PLAN.md (Enemy manager & pickup integration)
+Plan: 3 of 4 complete in Phase 5
+Status: Enemy visual components complete
+Last activity: 2026-02-03 — Completed 05-03-PLAN.md (Enemy visual components)
 
-Progress: [█████████░░░] 58% (4 phases complete + 2/4 of Phase 5, 17 of ~19 total plans)
+Progress: [█████████░░░] 63% (4 phases complete + 3/4 of Phase 5, 18 of ~19 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: 18.6 min
-- Total execution time: 5.33 hours
+- Total plans completed: 18
+- Average duration: 17.8 min
+- Total execution time: 5.38 hours
 
 **By Phase:**
 
@@ -31,14 +31,15 @@ Progress: [█████████░░░] 58% (4 phases complete + 2/4 of
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
 | 03 - Core Combat System | 4 | 15.0 min | 3.8 min |
 | 04 - Player Health & Survival | 3 | 7.0 min | 2.3 min |
-| 05 - Enemy AI & Combat | 2 | 6.0 min | 3.0 min |
+| 05 - Enemy AI & Combat | 3 | 10.0 min | 3.3 min |
 | **Phase 5 breakdown** | | | |
 | 05-01 (Core Enemy Infrastructure) | 1 | 3.0 min | 3.0 min |
 | 05-02 (Enemy Manager & Pickup Integration) | 1 | 3.0 min | 3.0 min |
+| 05-03 (Enemy Visual Components) | 1 | 4.0 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (1 min), 04-02 (2 min), 04-03 (4 min), 05-01 (3 min), 05-02 (3 min)
-- Trend: Pure code generation plans very fast (1-4 min), integration/validation plans vary (4-7 min)
+- Last 5 plans: 04-02 (2 min), 04-03 (4 min), 05-01 (3 min), 05-02 (3 min), 05-03 (4 min)
+- Trend: Pure code generation plans very fast (2-4 min), integration/validation plans vary (4-7 min)
 
 *Updated after each plan completion*
 
@@ -131,6 +132,12 @@ Recent decisions affecting current work:
 - 05-02: 35% drop chance (middle of 30-40% range), 50/50 ammo/health split
 - 05-02: Progressive difficulty: 2 + wave number, caps at 10 enemies max
 - 05-02: Health pickup pooling (size 10) mirrors ammo pickup pattern
+- 05-03: Explosion duration 0.3s with 2.0f max radius (satisfying destruction feedback)
+- 05-03: Expand over first half, shrink over second half for visual impact
+- 05-03: Orange (1.0, 0.8, 0.3) explosion color matches impact effects from 03-02
+- 05-03: Health pickup radius 0.3f (vs 0.2f ammo) for visual distinction
+- 05-03: Placeholder cube rendering for Phase 5, Mixamo models in Plan 04
+- 05-03: 8-segment sphere mesh matches ProjectileRenderer for consistency
 
 ### Pending Todos
 
@@ -156,11 +163,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 05-02-PLAN.md (Enemy manager & pickup integration)
+Stopped at: Completed 05-03-PLAN.md (Enemy visual components)
 Resume file: None
 
-**Phase 5 Plan 02 Complete:** Enemy manager with safe distance spawning (10u from player, 3u between enemies), object pooling (20 enemies), projectile collision detection (15 HP damage), 35% drop chance for ammo/health pickups, and progressive wave difficulty (2 + wave, caps at 10). TargetManager extended with health pickup pooling and CheckPickupCollection heals player. Ready for Plan 03 - Combat integration.
+**Phase 5 Plan 03 Complete:** ExplosionEffect with expand-shrink-fade animation over 0.3s (0 to 2.0f to 0 radius) and orange color matching impact effects. EnemyRenderer draws placeholder cube enemies, explosion spheres with dynamic radius/fade, and green health pickup spheres (0.3f radius). Sphere mesh generation (8 segments) matches ProjectileRenderer pattern. Placeholder rendering ready for Mixamo model integration in Plan 04. Fixed blocking issues: TargetManager method signatures, DebugRenderer health pickup support. Ready for Plan 04 - Final combat integration.
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-03 (Phase 5, Plan 02 complete)*
+*Last updated: 2026-02-03 (Phase 5, Plan 03 complete)*
