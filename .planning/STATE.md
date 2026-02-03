@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 
 ## Current Position
 
-Phase: 4 of 8 COMPLETE (Player Health & Survival)
-Plan: 3 of 3 complete in Phase 4
-Status: Phase 4 finalized, ready for Phase 5
-Last activity: 2026-02-03 — Completed 04-03-PLAN.md (Integration & verification)
+Phase: 5 of 8 IN PROGRESS (Enemy AI & Combat)
+Plan: 1 of 4 complete in Phase 5
+Status: Core enemy infrastructure complete
+Last activity: 2026-02-03 — Completed 05-01-PLAN.md (Core enemy infrastructure)
 
-Progress: [████████░░░░] 50% (4 of 8 phases complete, 15 total plans)
+Progress: [████████░░░░] 53% (4 phases complete + 1/4 of Phase 5, 16 of ~19 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: 21.3 min
-- Total execution time: 5.33 hours
+- Total plans completed: 16
+- Average duration: 19.8 min
+- Total execution time: 5.28 hours
 
 **By Phase:**
 
@@ -31,14 +31,13 @@ Progress: [████████░░░░] 50% (4 of 8 phases complete, 15
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
 | 03 - Core Combat System | 4 | 15.0 min | 3.8 min |
 | 04 - Player Health & Survival | 3 | 7.0 min | 2.3 min |
-| **Phase 4 breakdown** | | | |
-| 04-01 (Health Tracking & Damage Feedback) | 1 | 1.0 min | 1.0 min |
-| 04-02 (UI Visuals) | 1 | 2.0 min | 2.0 min |
-| 04-03 (Integration & Verification) | 1 | 4.0 min | 4.0 min |
+| 05 - Enemy AI & Combat | 1 | 3.0 min | 3.0 min |
+| **Phase 5 breakdown** | | | |
+| 05-01 (Core Enemy Infrastructure) | 1 | 3.0 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (2 min), 03-04 (7 min), 04-01 (1 min), 04-02 (2 min), 04-03 (4 min)
-- Trend: Pure code generation plans very fast (1-4 min), integration/validation plans vary (4-7 min for Phase 3-4)
+- Last 5 plans: 03-04 (7 min), 04-01 (1 min), 04-02 (2 min), 04-03 (4 min), 05-01 (3 min)
+- Trend: Pure code generation plans very fast (1-4 min), integration/validation plans vary (4-7 min)
 
 *Updated after each plan completion*
 
@@ -119,6 +118,12 @@ Recent decisions affecting current work:
 - 04-03: R key dual-purpose: respawn targets in Playing, restart in GameOver
 - 04-03: Death sequence flow: OnDeath event → Dying state → 1.5s fade → GameOver state
 - 04-03: RestartGame() centralizes health, fade, position, ammo, targets, weapon reset
+- 05-01: Enemy speed 3.5 units/sec (70% of player speed) for chaseable but escapable combat
+- 05-01: Attack range hysteresis (2.5 enter, 3.5 exit) prevents rapid state switching
+- 05-01: Enemy health 30 HP requires 2-3 laser hits for satisfying combat feel
+- 05-01: Direct movement toward player (no complex pathfinding for single-room arcade)
+- 05-01: Health pickup green color (universal health indicator), heals 25 HP
+- 05-01: Enemy FSM with Idle/Chase/Attack/Dying states, OnStateEnter/OnStateExit hooks
 
 ### Pending Todos
 
@@ -130,7 +135,7 @@ None yet.
 - Phase 1: FBX animation import is highest technical risk - custom content processor now implemented
 - Phase 1: Cross-platform content pipeline must be validated on all targets early
 - Future: Third-person camera clipping requires collision detection from start (Phase 2)
-- Future: AI pathfinding must be async to avoid performance collapse (Phase 5)
+- Phase 5: Direct movement sufficient for single-room arcade - complex pathfinding not needed (RESEARCH confirmed)
 
 **From 01-02:**
 - BoneContent.Index doesn't exist at build time - manual tracking required
@@ -144,11 +149,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 04-03-PLAN.md (Integration & verification)
+Stopped at: Completed 05-01-PLAN.md (Core enemy infrastructure)
 Resume file: None
 
-**Phase 4 Complete:** All player health and survival systems integrated and verified. HealthSystem with damage events, DamageVignette overlay, ScreenFade transitions, HealthBar display, GameOverScreen, and complete Playing/Dying/GameOver state machine. H key test damage, death sequence (vignette → fade → game over), and R key restart all validated through manual testing. Ready for Phase 5 - Robot Enemies & AI.
+**Phase 5 Plan 01 Complete:** Core enemy infrastructure created. EnemyState FSM enum (Idle/Chase/Attack/Dying), EnemyHealth with OnDamageTaken/OnDeath events (30 HP max), EnemyController with state-based AI and movement (3.5 units/sec, detection 15 units, attack 2.5 units with hysteresis), and HealthPickup with green color and bobbing animation. All classes support pooling (Activate/Deactivate). Ready for Plan 02 - Enemy manager integration.
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-03 (Phase 4 complete)*
+*Last updated: 2026-02-03 (Phase 5, Plan 01 complete)*
