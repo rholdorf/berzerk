@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 
 ## Current Position
 
-Phase: 5 of 8 IN PROGRESS (Enemy AI & Combat)
-Plan: 3 of 4 complete in Phase 5
-Status: Enemy visual components complete
-Last activity: 2026-02-03 — Completed 05-03-PLAN.md (Enemy visual components)
+Phase: 5 of 8 COMPLETE (Enemy AI & Combat)
+Plan: 4 of 4 complete in Phase 5
+Status: Phase 5 complete - full enemy combat integration delivered
+Last activity: 2026-02-03 — Completed 05-04-PLAN.md (Enemy system integration)
 
-Progress: [█████████░░░] 63% (4 phases complete + 3/4 of Phase 5, 18 of ~19 total plans)
+Progress: [██████████░░] 68% (5 phases complete, 19 of ~19 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: 17.8 min
-- Total execution time: 5.38 hours
+- Total plans completed: 19
+- Average duration: 16.2 min
+- Total execution time: 5.43 hours
 
 **By Phase:**
 
@@ -31,15 +31,16 @@ Progress: [█████████░░░] 63% (4 phases complete + 3/4 of
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
 | 03 - Core Combat System | 4 | 15.0 min | 3.8 min |
 | 04 - Player Health & Survival | 3 | 7.0 min | 2.3 min |
-| 05 - Enemy AI & Combat | 3 | 10.0 min | 3.3 min |
+| 05 - Enemy AI & Combat | 4 | 14.0 min | 3.5 min |
 | **Phase 5 breakdown** | | | |
 | 05-01 (Core Enemy Infrastructure) | 1 | 3.0 min | 3.0 min |
 | 05-02 (Enemy Manager & Pickup Integration) | 1 | 3.0 min | 3.0 min |
 | 05-03 (Enemy Visual Components) | 1 | 4.0 min | 4.0 min |
+| 05-04 (Enemy System Integration) | 1 | 4.0 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (2 min), 04-03 (4 min), 05-01 (3 min), 05-02 (3 min), 05-03 (4 min)
-- Trend: Pure code generation plans very fast (2-4 min), integration/validation plans vary (4-7 min)
+- Last 5 plans: 04-03 (4 min), 05-01 (3 min), 05-02 (3 min), 05-03 (4 min), 05-04 (4 min)
+- Trend: Pure code generation plans very fast (3-4 min), integration plans consistent (4 min)
 
 *Updated after each plan completion*
 
@@ -138,6 +139,11 @@ Recent decisions affecting current work:
 - 05-03: Health pickup radius 0.3f (vs 0.2f ammo) for visual distinction
 - 05-03: Placeholder cube rendering for Phase 5, Mixamo models in Plan 04
 - 05-03: 8-segment sphere mesh matches ProjectileRenderer for consistency
+- 05-04: Knockback force 8 units/sec provides satisfying pushback without excessive disruption
+- 05-04: Horizontal-only knockback (Y=0) keeps arcade-style ground combat feel
+- 05-04: Attack callback wiring after spawn allows dynamic enemy addition
+- 05-04: Explosion pooling in EnemyManager prevents GC spikes on mass death
+- 05-04: G key spawns test waves for combat tuning and verification
 
 ### Pending Todos
 
@@ -163,11 +169,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 05-03-PLAN.md (Enemy visual components)
+Stopped at: Completed 05-04-PLAN.md (Enemy system integration - Phase 5 complete)
 Resume file: None
 
-**Phase 5 Plan 03 Complete:** ExplosionEffect with expand-shrink-fade animation over 0.3s (0 to 2.0f to 0 radius) and orange color matching impact effects. EnemyRenderer draws placeholder cube enemies, explosion spheres with dynamic radius/fade, and green health pickup spheres (0.3f radius). Sphere mesh generation (8 segments) matches ProjectileRenderer pattern. Placeholder rendering ready for Mixamo model integration in Plan 04. Fixed blocking issues: TargetManager method signatures, DebugRenderer health pickup support. Ready for Plan 04 - Final combat integration.
+**Phase 5 Complete:** Full enemy combat integration delivered. Added knockback velocity to PlayerController with exponential decay (8 units/sec force, horizontal-only). EnemyController fires OnAttackPlayer event with damage and knockback direction. EnemyManager fully integrated: explosion pooling, attack callback wiring, reset on game restart. BerzerkGame wires enemy spawn (3 initial enemies), update loop, projectile collisions, and rendering (enemies, explosions, health pickups). G key spawns test waves. Complete arcade combat loop: spawn → detect → chase → attack with knockback → destroy with explosion → drop pickups. All Phase 5 requirements met (AI-01 through AI-06, ANIM-05-08 placeholders). Ready for Phase 6 - Procedural Room Generation.
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-03 (Phase 5, Plan 03 complete)*
+*Last updated: 2026-02-03 (Phase 5 complete)*
