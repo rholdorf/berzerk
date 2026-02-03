@@ -34,10 +34,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Health & Damage
 
-- [ ] **HEALTH-01**: Player has health points (HP bar)
-- [ ] **HEALTH-02**: Player takes damage when hit by enemy
-- [ ] **HEALTH-03**: Player dies when health reaches zero
-- [ ] **HEALTH-04**: Game over state when player dies
+- [x] **HEALTH-01**: Player has health points (HP bar)
+- [x] **HEALTH-02**: Player takes damage when hit by enemy
+- [x] **HEALTH-03**: Player dies when health reaches zero
+- [x] **HEALTH-04**: Game over state when player dies
 
 ### Enemy AI
 
@@ -162,10 +162,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMBAT-05 | Phase 3 | Complete |
 | COMBAT-06 | Phase 3 | Complete |
 | COMBAT-07 | Phase 3 | Complete |
-| HEALTH-01 | Phase 4 | Pending |
-| HEALTH-02 | Phase 4 | Pending |
-| HEALTH-03 | Phase 4 | Pending |
-| HEALTH-04 | Phase 4 | Pending |
+| HEALTH-01 | Phase 4 | Complete |
+| HEALTH-02 | Phase 4 | Complete |
+| HEALTH-03 | Phase 4 | Complete |
+| HEALTH-04 | Phase 4 | Complete |
 | AI-01 | Phase 5 | Pending |
 | AI-02 | Phase 5 | Pending |
 | AI-03 | Phase 5 | Pending |
