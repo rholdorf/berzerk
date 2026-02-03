@@ -11,8 +11,10 @@ namespace Berzerk.Source.Combat;
 public class TargetManager
 {
     private List<TestTarget> _targets = new();
-    private List<AmmoPickup> _pickups = new();
-    private Queue<AmmoPickup> _pickupPool = new();
+    private List<AmmoPickup> _ammoPickups = new();
+    private Queue<AmmoPickup> _ammoPickupPool = new();
+    private List<HealthPickup> _healthPickups = new();
+    private Queue<HealthPickup> _healthPickupPool = new();
 
     private const int POOL_SIZE = 10;
 
@@ -21,10 +23,16 @@ public class TargetManager
     /// </summary>
     public void Initialize()
     {
-        // Pre-populate pickup pool
+        // Pre-populate ammo pickup pool
         for (int i = 0; i < POOL_SIZE; i++)
         {
-            _pickupPool.Enqueue(new AmmoPickup(Vector3.Zero));
+            _ammoPickupPool.Enqueue(new AmmoPickup(Vector3.Zero));
+        }
+
+        // Pre-populate health pickup pool
+        for (int i = 0; i < POOL_SIZE; i++)
+        {
+            _healthPickupPool.Enqueue(new HealthPickup(Vector3.Zero));
         }
 
         // Create test targets at fixed positions for validation
@@ -47,8 +55,8 @@ public class TargetManager
             }
         }
 
-        // Update all active pickups
-        foreach (var pickup in _pickups)
+        // Update all active ammo pickups
+        foreach (var pickup in _ammoPickups)
         {
             if (pickup.IsActive)
             {
@@ -56,13 +64,32 @@ public class TargetManager
             }
         }
 
-        // Return inactive pickups to pool (iterate backwards)
-        for (int i = _pickups.Count - 1; i >= 0; i--)
+        // Update all active health pickups
+        foreach (var pickup in _healthPickups)
         {
-            if (!_pickups[i].IsActive)
+            if (pickup.IsActive)
             {
-                _pickupPool.Enqueue(_pickups[i]);
-                _pickups.RemoveAt(i);
+                pickup.Update(deltaTime);
+            }
+        }
+
+        // Return inactive ammo pickups to pool (iterate backwards)
+        for (int i = _ammoPickups.Count - 1; i >= 0; i--)
+        {
+            if (!_ammoPickups[i].IsActive)
+            {
+                _ammoPickupPool.Enqueue(_ammoPickups[i]);
+                _ammoPickups.RemoveAt(i);
+            }
+        }
+
+        // Return inactive health pickups to pool (iterate backwards)
+        for (int i = _healthPickups.Count - 1; i >= 0; i--)
+        {
+            if (!_healthPickups[i].IsActive)
+            {
+                _healthPickupPool.Enqueue(_healthPickups[i]);
+                _healthPickups.RemoveAt(i);
             }
         }
     }
@@ -90,7 +117,7 @@ public class TargetManager
 
                     if (!stillAlive)
                     {
-                        SpawnPickup(target.Position);
+                        SpawnAmmoPickup(target.Position);
                     }
 
                     break; // Projectile hit something, stop checking
@@ -100,11 +127,12 @@ public class TargetManager
     }
 
     /// <summary>
-    /// Check pickup collection and notify AmmoSystem.
+    /// Check pickup collection and notify AmmoSystem and HealthSystem.
     /// </summary>
-    public void CheckPickupCollection(Vector3 playerPosition, AmmoSystem ammoSystem)
+    public void CheckPickupCollection(Vector3 playerPosition, AmmoSystem ammoSystem, Player.HealthSystem healthSystem)
     {
-        foreach (var pickup in _pickups)
+        // Check ammo pickup collection
+        foreach (var pickup in _ammoPickups)
         {
             if (!pickup.IsActive) continue;
 
@@ -115,18 +143,31 @@ public class TargetManager
                 Console.WriteLine($"Collected {amount} ammo!");
             }
         }
+
+        // Check health pickup collection
+        foreach (var pickup in _healthPickups)
+        {
+            if (!pickup.IsActive) continue;
+
+            if (pickup.CheckCollection(playerPosition))
+            {
+                int amount = pickup.Collect();
+                healthSystem.Heal(amount);
+                Console.WriteLine($"Healed {amount} HP!");
+            }
+        }
     }
 
     /// <summary>
     /// Spawn ammo pickup at specified position.
     /// </summary>
-    private void SpawnPickup(Vector3 position)
+    public void SpawnAmmoPickup(Vector3 position)
     {
         AmmoPickup pickup;
 
-        if (_pickupPool.Count > 0)
+        if (_ammoPickupPool.Count > 0)
         {
-            pickup = _pickupPool.Dequeue();
+            pickup = _ammoPickupPool.Dequeue();
             pickup.Activate(position);
         }
         else
@@ -134,7 +175,27 @@ public class TargetManager
             pickup = new AmmoPickup(position);
         }
 
-        _pickups.Add(pickup);
+        _ammoPickups.Add(pickup);
+    }
+
+    /// <summary>
+    /// Spawn health pickup at specified position.
+    /// </summary>
+    public void SpawnHealthPickup(Vector3 position)
+    {
+        HealthPickup pickup;
+
+        if (_healthPickupPool.Count > 0)
+        {
+            pickup = _healthPickupPool.Dequeue();
+            pickup.Activate(position);
+        }
+        else
+        {
+            pickup = new HealthPickup(position);
+        }
+
+        _healthPickups.Add(pickup);
     }
 
     /// <summary>
@@ -146,11 +207,19 @@ public class TargetManager
     }
 
     /// <summary>
-    /// Get read-only list of all pickups.
+    /// Get read-only list of all ammo pickups.
     /// </summary>
-    public IReadOnlyList<AmmoPickup> GetPickups()
+    public IReadOnlyList<AmmoPickup> GetAmmoPickups()
     {
-        return _pickups;
+        return _ammoPickups;
+    }
+
+    /// <summary>
+    /// Get read-only list of all health pickups.
+    /// </summary>
+    public IReadOnlyList<HealthPickup> GetHealthPickups()
+    {
+        return _healthPickups;
     }
 
     /// <summary>
@@ -161,12 +230,19 @@ public class TargetManager
         // Clear existing targets
         _targets.Clear();
 
-        // Return all pickups to pool
-        foreach (var pickup in _pickups)
+        // Return all ammo pickups to pool
+        foreach (var pickup in _ammoPickups)
         {
-            _pickupPool.Enqueue(pickup);
+            _ammoPickupPool.Enqueue(pickup);
         }
-        _pickups.Clear();
+        _ammoPickups.Clear();
+
+        // Return all health pickups to pool
+        foreach (var pickup in _healthPickups)
+        {
+            _healthPickupPool.Enqueue(pickup);
+        }
+        _healthPickups.Clear();
 
         // Re-initialize targets at fixed positions
         _targets.Add(new TestTarget(new Vector3(-5, 0.5f, -5)));

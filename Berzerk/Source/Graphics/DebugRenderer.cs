@@ -154,4 +154,26 @@ public class DebugRenderer
             }
         }
     }
+
+    /// <summary>
+    /// Draw health pickups as floating green boxes.
+    /// </summary>
+    public void DrawHealthPickups(IReadOnlyList<HealthPickup> pickups, Matrix view, Matrix projection)
+    {
+        foreach (var pickup in pickups)
+        {
+            if (pickup.IsActive)
+            {
+                Vector3 displayPos = pickup.GetDisplayPosition();
+                // Create small box around pickup position
+                float size = 0.3f; // Slightly larger for health (0.3f radius from plan)
+                BoundingBox box = new BoundingBox(
+                    displayPos - new Vector3(size),
+                    displayPos + new Vector3(size)
+                );
+                Color color = pickup.GetColor();
+                DrawBoundingBox(box, view, projection, color);
+            }
+        }
+    }
 }

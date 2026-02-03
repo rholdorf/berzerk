@@ -202,7 +202,7 @@ public class BerzerkGame : Game
         _projectileManager.Update(deltaTime);
         _targetManager.Update(deltaTime);
         _targetManager.CheckProjectileCollisions(_projectileManager.GetActiveProjectiles());
-        _targetManager.CheckPickupCollection(_playerController.Transform.Position, _ammoSystem);
+        _targetManager.CheckPickupCollection(_playerController.Transform.Position, _ammoSystem, _healthSystem);
 
         // R key respawns targets (existing)
         if (_inputManager.IsKeyPressed(Keys.R))
@@ -305,7 +305,8 @@ public class BerzerkGame : Game
             _projectileRenderer.Draw(_projectileManager.GetActiveProjectiles(), _camera.ViewMatrix, _camera.ProjectionMatrix);
             _projectileRenderer.DrawEffects(_projectileManager.GetActiveEffects(), _camera.ViewMatrix, _camera.ProjectionMatrix);
             _debugRenderer.DrawTargets(_targetManager.GetTargets(), _camera.ViewMatrix, _camera.ProjectionMatrix);
-            _debugRenderer.DrawPickups(_targetManager.GetPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            _debugRenderer.DrawPickups(_targetManager.GetAmmoPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            _debugRenderer.DrawHealthPickups(_targetManager.GetHealthPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
 
             // Draw 3D content with camera matrices
             // Scale down model by 0.01x - Mixamo models are typically 100x too large
