@@ -21,7 +21,11 @@ public class PlayerController
     private const float Deceleration = 15f;    // How fast to stop
     private const float RotationSpeed = 3f;    // Radians per second for tank rotation
 
+    // Knockback settings
+    private const float KnockbackDecay = 10f;  // How fast knockback fades
+
     private Vector3 _velocity = Vector3.Zero;
+    private Vector3 _knockbackVelocity = Vector3.Zero;
     private InputManager _inputManager;
 
     public bool IsMoving => _velocity.LengthSquared() > 0.01f;
@@ -37,6 +41,18 @@ public class PlayerController
         if (!IsEnabled) return;
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        // Apply knockback velocity (before normal movement)
+        Transform.Position += _knockbackVelocity * deltaTime;
+
+        // Decay knockback exponentially (pattern from DamageVignette)
+        _knockbackVelocity *= (float)Math.Pow(0.01, deltaTime * KnockbackDecay / 0.4);
+
+        // Clear tiny values to avoid floating point drift
+        if (_knockbackVelocity.LengthSquared() < 0.01f)
+        {
+            _knockbackVelocity = Vector3.Zero;
+        }
 
         // 1. Handle rotation input (A/D keys)
         HandleRotation(deltaTime);
@@ -87,5 +103,19 @@ public class PlayerController
 
         // Transform from local space to world space using character rotation
         return Vector3.Transform(localDir, Transform.Rotation);
+    }
+
+    /// <summary>
+    /// Apply knockback force in specified direction.
+    /// Direction should be from attacker to player (horizontal only).
+    /// </summary>
+    public void ApplyKnockback(Vector3 direction, float force)
+    {
+        // Ensure horizontal knockback only
+        direction.Y = 0;
+        if (direction.LengthSquared() > 0)
+        {
+            _knockbackVelocity += Vector3.Normalize(direction) * force;
+        }
     }
 }
