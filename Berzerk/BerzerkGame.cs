@@ -8,6 +8,7 @@ using Berzerk.Controllers;
 using Berzerk.UI;
 using Berzerk.Source.Combat;
 using Berzerk.Source.Player;
+using Berzerk.Source.Enemies;
 using System;
 using System.Collections.Generic;
 
@@ -45,6 +46,10 @@ public class BerzerkGame : Game
     private HealthBar _healthBar;
     private GameOverScreen _gameOverScreen;
     private GameState _gameState = GameState.Playing;
+
+    // Enemy system
+    private EnemyManager _enemyManager;
+    private EnemyRenderer _enemyRenderer;
 
     // Test animated model and animations
     private AnimatedModel _testCharacter;
@@ -91,6 +96,11 @@ public class BerzerkGame : Game
             Console.WriteLine("Player died!");
         };
 
+        // Initialize enemy system
+        _enemyManager = new EnemyManager();
+        _enemyManager.Initialize(20);
+        _enemyManager.SetTargetManager(_targetManager);
+
         base.Initialize();
     }
 
@@ -133,6 +143,22 @@ public class BerzerkGame : Game
         // Initialize projectile renderer after graphics device is ready
         _projectileRenderer = new ProjectileRenderer(GraphicsDevice);
 
+        // Initialize enemy renderer
+        _enemyRenderer = new EnemyRenderer(GraphicsDevice);
+
+        // Spawn initial enemy wave (3 enemies per CONTEXT)
+        _enemyManager.SpawnWave(3, _playerController.Transform.Position);
+        Console.WriteLine("Spawned initial wave: 3 enemies");
+
+        // Wire enemy attacks to player damage and knockback
+        _enemyManager.SetAttackCallback((damage, direction) =>
+        {
+            if (_gameState != GameState.Playing) return;
+            _healthSystem.TakeDamage(damage);
+            _playerController.ApplyKnockback(direction, 8f); // 8 units/sec knockback force
+            Console.WriteLine($"Enemy attacked! -{damage} HP");
+        });
+
         // Load health UI
         _damageVignette = new DamageVignette();
         _damageVignette.LoadContent(GraphicsDevice);
@@ -154,6 +180,7 @@ public class BerzerkGame : Game
         Console.WriteLine("Scroll wheel: Zoom camera");
         Console.WriteLine("H: Test damage (10 HP)");
         Console.WriteLine("R: Respawn targets / Restart (game over)");
+        Console.WriteLine("G: Spawn new enemy wave");
         Console.WriteLine("1/2/3: Switch animations");
         Console.WriteLine("Escape: Exit");
         Console.WriteLine("================\n");
@@ -204,11 +231,30 @@ public class BerzerkGame : Game
         _targetManager.CheckProjectileCollisions(_projectileManager.GetActiveProjectiles());
         _targetManager.CheckPickupCollection(_playerController.Transform.Position, _ammoSystem, _healthSystem);
 
+        // Update enemy system
+        _enemyManager.Update(gameTime, _playerController.Transform.Position);
+        _enemyManager.CheckProjectileCollisions(_projectileManager.GetActiveProjectiles());
+
         // R key respawns targets (existing)
         if (_inputManager.IsKeyPressed(Keys.R))
         {
             _targetManager.RespawnTargets();
             Console.WriteLine("Targets respawned!");
+        }
+
+        // G key spawns new enemy wave (test)
+        if (_inputManager.IsKeyPressed(Keys.G))
+        {
+            int waveSize = 3;
+            _enemyManager.SpawnWave(waveSize, _playerController.Transform.Position);
+            _enemyManager.SetAttackCallback((damage, direction) =>
+            {
+                if (_gameState != GameState.Playing) return;
+                _healthSystem.TakeDamage(damage);
+                _playerController.ApplyKnockback(direction, 8f);
+                Console.WriteLine($"Enemy attacked! -{damage} HP");
+            });
+            Console.WriteLine($"Spawned test wave: {waveSize} enemies");
         }
 
         // Animation switching using keyboard input
@@ -285,6 +331,18 @@ public class BerzerkGame : Game
         _targetManager.RespawnTargets();
         _ammoSystem = new AmmoSystem();  // Reset ammo
         _weaponSystem = new WeaponSystem(_ammoSystem, _projectileManager);
+
+        // Reset and respawn enemies
+        _enemyManager.Reset();
+        _enemyManager.SpawnWave(3, _playerController.Transform.Position);
+        _enemyManager.SetAttackCallback((damage, direction) =>
+        {
+            if (_gameState != GameState.Playing) return;
+            _healthSystem.TakeDamage(damage);
+            _playerController.ApplyKnockback(direction, 8f);
+            Console.WriteLine($"Enemy attacked! -{damage} HP");
+        });
+
         Console.WriteLine("Game restarted!");
     }
 
@@ -306,7 +364,11 @@ public class BerzerkGame : Game
             _projectileRenderer.DrawEffects(_projectileManager.GetActiveEffects(), _camera.ViewMatrix, _camera.ProjectionMatrix);
             _debugRenderer.DrawTargets(_targetManager.GetTargets(), _camera.ViewMatrix, _camera.ProjectionMatrix);
             _debugRenderer.DrawPickups(_targetManager.GetAmmoPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
-            _debugRenderer.DrawHealthPickups(_targetManager.GetHealthPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+
+            // Draw enemy system
+            _enemyRenderer.DrawEnemies(_enemyManager.GetEnemies(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            _enemyRenderer.DrawExplosions(_enemyManager.GetActiveExplosions(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            _enemyRenderer.DrawHealthPickups(_targetManager.GetHealthPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
 
             // Draw 3D content with camera matrices
             // Scale down model by 0.01x - Mixamo models are typically 100x too large

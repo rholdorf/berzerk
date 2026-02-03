@@ -17,6 +17,10 @@ public class EnemyManager
     private TargetManager? _targetManager;
     private Random _random;
 
+    // Explosion effects
+    private List<ExplosionEffect> _activeExplosions;
+    private Queue<ExplosionEffect> _explosionPool;
+
     // Wave progression
     private int _currentWave = 0;
     private const int MAX_ENEMIES_PER_WAVE = 10;
@@ -64,6 +68,14 @@ public class EnemyManager
         for (int i = 0; i < poolSize; i++)
         {
             _enemyPool.Enqueue(new EnemyController());
+        }
+
+        // Initialize explosion effect pool
+        _activeExplosions = new List<ExplosionEffect>();
+        _explosionPool = new Queue<ExplosionEffect>(poolSize);
+        for (int i = 0; i < poolSize; i++)
+        {
+            _explosionPool.Enqueue(new ExplosionEffect());
         }
     }
 
@@ -172,11 +184,25 @@ public class EnemyManager
     }
 
     /// <summary>
-    /// Update all active enemies.
+    /// Set callback for enemy attacks (wires to player damage/knockback).
+    /// Call this after spawning to wire all active enemies.
+    /// </summary>
+    public void SetAttackCallback(Action<int, Vector3> attackCallback)
+    {
+        foreach (var enemy in _enemies)
+        {
+            enemy.OnAttackPlayer += attackCallback;
+        }
+    }
+
+    /// <summary>
+    /// Update all active enemies and explosion effects.
     /// Returns inactive enemies to pool.
     /// </summary>
     public void Update(GameTime gameTime, Vector3 playerPos)
     {
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
         // Update all enemies
         foreach (var enemy in _enemies)
         {
@@ -190,6 +216,22 @@ public class EnemyManager
             {
                 _enemyPool.Enqueue(_enemies[i]);
                 _enemies.RemoveAt(i);
+            }
+        }
+
+        // Update explosion effects
+        foreach (var explosion in _activeExplosions)
+        {
+            explosion.Update(deltaTime);
+        }
+
+        // Return inactive explosions to pool
+        for (int i = _activeExplosions.Count - 1; i >= 0; i--)
+        {
+            if (!_activeExplosions[i].IsActive)
+            {
+                _explosionPool.Enqueue(_activeExplosions[i]);
+                _activeExplosions.RemoveAt(i);
             }
         }
     }
@@ -225,10 +267,13 @@ public class EnemyManager
     }
 
     /// <summary>
-    /// Handle enemy death - spawn pickup with 35% chance.
+    /// Handle enemy death - spawn explosion effect and pickup with 35% chance.
     /// </summary>
     private void OnEnemyDeath(EnemyController enemy)
     {
+        // Spawn explosion effect
+        SpawnExplosion(enemy.Transform.Position);
+
         if (_targetManager == null) return;
 
         // 35% chance to drop pickup
@@ -247,10 +292,58 @@ public class EnemyManager
     }
 
     /// <summary>
+    /// Spawn explosion effect at specified position.
+    /// </summary>
+    private void SpawnExplosion(Vector3 position)
+    {
+        ExplosionEffect explosion = _explosionPool.Count > 0
+            ? _explosionPool.Dequeue()
+            : new ExplosionEffect();
+
+        explosion.Activate(position);
+        _activeExplosions.Add(explosion);
+    }
+
+    /// <summary>
     /// Get read-only list of active enemies.
     /// </summary>
     public IReadOnlyList<EnemyController> GetEnemies()
     {
         return _enemies.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Get read-only list of active explosion effects.
+    /// </summary>
+    public IReadOnlyList<ExplosionEffect> GetActiveExplosions()
+    {
+        return _activeExplosions.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Reset enemy manager (for game restart).
+    /// </summary>
+    public void Reset()
+    {
+        // Return all enemies to pool
+        while (_enemies.Count > 0)
+        {
+            var enemy = _enemies[0];
+            enemy.Deactivate();
+            _enemyPool.Enqueue(enemy);
+            _enemies.RemoveAt(0);
+        }
+
+        // Return all explosions to pool
+        while (_activeExplosions.Count > 0)
+        {
+            var explosion = _activeExplosions[0];
+            explosion.Deactivate();
+            _explosionPool.Enqueue(explosion);
+            _activeExplosions.RemoveAt(0);
+        }
+
+        // Reset wave counter
+        _currentWave = 0;
     }
 }
