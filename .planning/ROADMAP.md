@@ -86,10 +86,12 @@ Plans:
   2. Player health decreases when hit by test damage source
   3. Player dies (character stops responding) when health reaches zero
   4. Game over state triggers when player dies
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD (to be planned in /gsd:plan-phase 4)
+- [ ] 04-01-PLAN.md — Health system and damage vignette
+- [ ] 04-02-PLAN.md — Death visuals, health bar, and game over screen
+- [ ] 04-03-PLAN.md — Integration and verification checkpoint
 
 ### Phase 5: Enemy AI & Combat
 **Goal**: Robot enemies spawn, chase player, attack, and can be destroyed
@@ -165,7 +167,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Foundation & Content Pipeline | 4/4 | Complete | 2026-02-01 |
 | 2. Player Movement & Camera | 4/4 | Complete | 2026-02-02 |
 | 3. Core Combat System | 4/4 | Complete | 2026-02-02 |
-| 4. Player Health & Survival | 0/? | Not started | - |
+| 4. Player Health & Survival | 0/3 | Planned | - |
 | 5. Enemy AI & Combat | 0/? | Not started | - |
 | 6. Room System & Progression | 0/? | Not started | - |
 | 7. UI & HUD | 0/? | Not started | - |
@@ -173,4 +175,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 ---
 *Roadmap created: 2026-01-31*
-*Last updated: 2026-02-02*
+*Last updated: 2026-02-03*
