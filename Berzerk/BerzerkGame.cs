@@ -7,10 +7,18 @@ using Berzerk.Source.Graphics;
 using Berzerk.Controllers;
 using Berzerk.UI;
 using Berzerk.Source.Combat;
+using Berzerk.Source.Player;
 using System;
 using System.Collections.Generic;
 
 namespace Berzerk;
+
+public enum GameState
+{
+    Playing,
+    Dying,
+    GameOver
+}
 
 public class BerzerkGame : Game
 {
@@ -29,6 +37,14 @@ public class BerzerkGame : Game
     private AmmoSystem _ammoSystem;
     private WeaponSystem _weaponSystem;
     private TargetManager _targetManager;
+
+    // Health and survival
+    private HealthSystem _healthSystem;
+    private DamageVignette _damageVignette;
+    private ScreenFade _screenFade;
+    private HealthBar _healthBar;
+    private GameOverScreen _gameOverScreen;
+    private GameState _gameState = GameState.Playing;
 
     // Test animated model and animations
     private AnimatedModel _testCharacter;
@@ -63,6 +79,17 @@ public class BerzerkGame : Game
         _weaponSystem = new WeaponSystem(_ammoSystem, _projectileManager);
         _targetManager = new TargetManager();
         _targetManager.Initialize();
+
+        // Initialize health system
+        _healthSystem = new HealthSystem();
+        _healthSystem.OnDamageTaken += () => _damageVignette.Trigger();
+        _healthSystem.OnDeath += () =>
+        {
+            _gameState = GameState.Dying;
+            _screenFade.FadeToBlack(1.5f);  // 1.5 second fade
+            _playerController.IsEnabled = false;
+            Console.WriteLine("Player died!");
+        };
 
         base.Initialize();
     }
@@ -106,13 +133,27 @@ public class BerzerkGame : Game
         // Initialize projectile renderer after graphics device is ready
         _projectileRenderer = new ProjectileRenderer(GraphicsDevice);
 
+        // Load health UI
+        _damageVignette = new DamageVignette();
+        _damageVignette.LoadContent(GraphicsDevice);
+
+        _screenFade = new ScreenFade();
+        _screenFade.LoadContent(GraphicsDevice);
+
+        _healthBar = new HealthBar();
+        _healthBar.LoadContent(GraphicsDevice);
+
+        _gameOverScreen = new GameOverScreen();
+        _gameOverScreen.LoadContent(Content, GraphicsDevice);
+
         Console.WriteLine("\n=== Controls ===");
         Console.WriteLine("WASD/QE: Move player (tank controls)");
         Console.WriteLine("Mouse: Aim (crosshair)");
         Console.WriteLine("Left Mouse: Fire (hold for auto-fire)");
         Console.WriteLine("Right-click + drag: Orbit camera");
         Console.WriteLine("Scroll wheel: Zoom camera");
-        Console.WriteLine("R: Respawn targets");
+        Console.WriteLine("H: Test damage (10 HP)");
+        Console.WriteLine("R: Respawn targets / Restart (game over)");
         Console.WriteLine("1/2/3: Switch animations");
         Console.WriteLine("Escape: Exit");
         Console.WriteLine("================\n");
@@ -120,32 +161,50 @@ public class BerzerkGame : Game
 
     protected override void Update(GameTime gameTime)
     {
-        // Update input state at start of frame
         _inputManager.Update();
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        // Update player controller
+        switch (_gameState)
+        {
+            case GameState.Playing:
+                UpdatePlaying(gameTime, deltaTime);
+                break;
+            case GameState.Dying:
+                UpdateDying(deltaTime);
+                break;
+            case GameState.GameOver:
+                UpdateGameOver();
+                break;
+        }
+
+        base.Update(gameTime);
+    }
+
+    private void UpdatePlaying(GameTime gameTime, float deltaTime)
+    {
+        // Test damage: H key deals 10 HP
+        if (_inputManager.IsKeyPressed(Keys.H))
+        {
+            _healthSystem.TakeDamage(10);
+            Console.WriteLine($"Damage! Health: {_healthSystem.CurrentHealth}/{_healthSystem.MaxHealth}");
+        }
+
+        // Existing player/camera/combat updates
         _playerController.Update(gameTime);
-
-        // Update camera
         _camera.Update(gameTime);
 
         // Combat update
         bool isFiring = _inputManager.IsLeftMouseHeld();
-        Vector3 spawnPos = _playerController.Transform.Position + Vector3.Up * 1.5f; // Shoulder height
+        Vector3 spawnPos = _playerController.Transform.Position + Vector3.Up * 1.5f;
         Vector3 aimDir = _camera.Forward;
         _weaponSystem.Update(gameTime, isFiring, spawnPos, aimDir);
 
-        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         _projectileManager.Update(deltaTime);
         _targetManager.Update(deltaTime);
         _targetManager.CheckProjectileCollisions(_projectileManager.GetActiveProjectiles());
         _targetManager.CheckPickupCollection(_playerController.Transform.Position, _ammoSystem);
 
-        // Test: Escape key exits game
-        if (_inputManager.IsKeyPressed(Keys.Escape))
-            Exit();
-
-        // R key respawns targets for testing
+        // R key respawns targets (existing)
         if (_inputManager.IsKeyPressed(Keys.R))
         {
             _targetManager.RespawnTargets();
@@ -184,45 +243,107 @@ public class BerzerkGame : Game
             }
         }
 
-        // Update current animation
+        // Update animations and effects
         _currentModel?.Update(gameTime);
+        _damageVignette.Update(deltaTime);
 
-        base.Update(gameTime);
+        // Exit handling
+        if (_inputManager.IsKeyPressed(Keys.Escape))
+            Exit();
+    }
+
+    private void UpdateDying(float deltaTime)
+    {
+        _screenFade.Update(deltaTime);
+        _damageVignette.Update(deltaTime);  // Continue fading any active vignette
+
+        if (_screenFade.IsComplete)
+        {
+            _gameState = GameState.GameOver;
+            Console.WriteLine("Game Over - Press R to restart");
+        }
+    }
+
+    private void UpdateGameOver()
+    {
+        if (_inputManager.IsKeyPressed(Keys.R))
+        {
+            RestartGame();
+        }
+
+        if (_inputManager.IsKeyPressed(Keys.Escape))
+            Exit();
+    }
+
+    private void RestartGame()
+    {
+        _healthSystem.Reset();
+        _screenFade.Reset();
+        _playerController.IsEnabled = true;
+        _playerController.Transform.Position = Vector3.Zero;  // Reset position
+        _gameState = GameState.Playing;
+        _targetManager.RespawnTargets();
+        _ammoSystem = new AmmoSystem();  // Reset ammo
+        _weaponSystem = new WeaponSystem(_ammoSystem, _projectileManager);
+        Console.WriteLine("Game restarted!");
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        // Draw floor grid
-        _debugRenderer.DrawFloor(_camera.ViewMatrix, _camera.ProjectionMatrix);
+        // Draw 3D content (only when not fully faded to black)
+        if (_screenFade.Alpha < 0.99f)
+        {
+            // Draw floor grid
+            _debugRenderer.DrawFloor(_camera.ViewMatrix, _camera.ProjectionMatrix);
 
-        // Draw collision walls
-        _debugRenderer.DrawBoundingBoxes(_testWalls, _camera.ViewMatrix, _camera.ProjectionMatrix, Color.White);
+            // Draw collision walls
+            _debugRenderer.DrawBoundingBoxes(_testWalls, _camera.ViewMatrix, _camera.ProjectionMatrix, Color.White);
 
-        // Draw combat elements
-        _projectileRenderer.Draw(_projectileManager.GetActiveProjectiles(), _camera.ViewMatrix, _camera.ProjectionMatrix);
-        _projectileRenderer.DrawEffects(_projectileManager.GetActiveEffects(), _camera.ViewMatrix, _camera.ProjectionMatrix);
-        _debugRenderer.DrawTargets(_targetManager.GetTargets(), _camera.ViewMatrix, _camera.ProjectionMatrix);
-        _debugRenderer.DrawPickups(_targetManager.GetPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            // Draw combat elements
+            _projectileRenderer.Draw(_projectileManager.GetActiveProjectiles(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            _projectileRenderer.DrawEffects(_projectileManager.GetActiveEffects(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            _debugRenderer.DrawTargets(_targetManager.GetTargets(), _camera.ViewMatrix, _camera.ProjectionMatrix);
+            _debugRenderer.DrawPickups(_targetManager.GetPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
 
-        // Draw 3D content with camera matrices
-        // Scale down model by 0.01x - Mixamo models are typically 100x too large
-        // Mixamo models face +Z, but we want them to face -Z (forward in MonoGame)
-        Matrix modelScale = Matrix.CreateScale(0.01f);
-        Matrix modelRotationCorrection = Matrix.CreateRotationY(MathHelper.Pi); // 180 degree turn
-        Matrix worldMatrix = modelScale * modelRotationCorrection * _playerController.Transform.WorldMatrix;
+            // Draw 3D content with camera matrices
+            // Scale down model by 0.01x - Mixamo models are typically 100x too large
+            // Mixamo models face +Z, but we want them to face -Z (forward in MonoGame)
+            Matrix modelScale = Matrix.CreateScale(0.01f);
+            Matrix modelRotationCorrection = Matrix.CreateRotationY(MathHelper.Pi); // 180 degree turn
+            Matrix worldMatrix = modelScale * modelRotationCorrection * _playerController.Transform.WorldMatrix;
 
-        _currentModel?.Draw(
-            GraphicsDevice,
-            worldMatrix,
-            _camera.ViewMatrix,
-            _camera.ProjectionMatrix
-        );
+            _currentModel?.Draw(
+                GraphicsDevice,
+                worldMatrix,
+                _camera.ViewMatrix,
+                _camera.ProjectionMatrix
+            );
+        }
 
-        // Draw 2D UI (crosshair)
+        // Draw 2D UI
         _spriteBatch.Begin();
-        _crosshair.Draw(_spriteBatch, GraphicsDevice.Viewport);
+
+        // Always draw crosshair during gameplay
+        if (_gameState == GameState.Playing)
+        {
+            _crosshair.Draw(_spriteBatch, GraphicsDevice.Viewport);
+            _healthBar.Draw(_spriteBatch, _healthSystem.CurrentHealth, _healthSystem.MaxHealth);
+        }
+
+        // Draw damage vignette (always, handles own alpha)
+        _damageVignette.Draw(_spriteBatch, GraphicsDevice.Viewport);
+
+        // Draw screen fade (always, handles own alpha)
+        _screenFade.Draw(_spriteBatch, GraphicsDevice.Viewport);
+
+        // Draw game over screen when in GameOver state
+        if (_gameState == GameState.GameOver)
+        {
+            _gameOverScreen.Draw(_spriteBatch, GraphicsDevice.Viewport);
+        }
+
         _spriteBatch.End();
 
         base.Draw(gameTime);
