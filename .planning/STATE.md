@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-31)
 ## Current Position
 
 Phase: 5 of 8 COMPLETE (Enemy AI & Combat)
-Plan: 4 of 4 complete in Phase 5
-Status: Phase 5 complete - full enemy combat integration delivered
-Last activity: 2026-02-03 — Completed 05-04-PLAN.md (Enemy system integration)
+Plan: 5 of 5 complete in Phase 5
+Status: Phase 5 complete - animated robot enemies with full FSM integration
+Last activity: 2026-02-04 — Completed 05-05-PLAN.md (Animated robot models and gap closure)
 
-Progress: [██████████░░] 68% (5 phases complete, 19 of ~19 total plans)
+Progress: [██████████░░] 71% (5 phases complete, 20 of ~28 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
-- Average duration: 16.2 min
-- Total execution time: 5.43 hours
+- Total plans completed: 20
+- Average duration: 15.7 min
+- Total execution time: 5.48 hours
 
 **By Phase:**
 
@@ -31,16 +31,17 @@ Progress: [██████████░░] 68% (5 phases complete, 19 of ~
 | 02 - Player Movement & Camera | 4 | 137.0 min | 34.3 min |
 | 03 - Core Combat System | 4 | 15.0 min | 3.8 min |
 | 04 - Player Health & Survival | 3 | 7.0 min | 2.3 min |
-| 05 - Enemy AI & Combat | 4 | 14.0 min | 3.5 min |
+| 05 - Enemy AI & Combat | 5 | 16.0 min | 3.2 min |
 | **Phase 5 breakdown** | | | |
 | 05-01 (Core Enemy Infrastructure) | 1 | 3.0 min | 3.0 min |
 | 05-02 (Enemy Manager & Pickup Integration) | 1 | 3.0 min | 3.0 min |
 | 05-03 (Enemy Visual Components) | 1 | 4.0 min | 4.0 min |
 | 05-04 (Enemy System Integration) | 1 | 4.0 min | 4.0 min |
+| 05-05 (Animated Robot Models) | 1 | 2.0 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (4 min), 05-01 (3 min), 05-02 (3 min), 05-03 (4 min), 05-04 (4 min)
-- Trend: Pure code generation plans very fast (3-4 min), integration plans consistent (4 min)
+- Last 5 plans: 05-01 (3 min), 05-02 (3 min), 05-03 (4 min), 05-04 (4 min), 05-05 (2 min)
+- Trend: Pure code generation plans very fast (2-4 min), integration plans consistent (4 min)
 
 *Updated after each plan completion*
 
@@ -144,6 +145,11 @@ Recent decisions affecting current work:
 - 05-04: Attack callback wiring after spawn allows dynamic enemy addition
 - 05-04: Explosion pooling in EnemyManager prevents GC spikes on mass death
 - 05-04: G key spawns test waves for combat tuning and verification
+- 05-05: Player and enemies share same character model (test-character.fbx from Mixamo)
+- 05-05: Animation files are skeleton-only (no skin): idle.fbx, walk.fbx, bash.fbx
+- 05-05: Shared animation model pattern: load once, reuse across all enemy instances
+- 05-05: FSM-driven animation switching: SetCurrentModel() in OnStateEnter()
+- 05-05: Model assignment flow: Renderer loads → Manager receives → spawn wires to controllers
 
 ### Pending Todos
 
@@ -168,12 +174,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-03
-Stopped at: Completed 05-04-PLAN.md (Enemy system integration - Phase 5 complete)
+Last session: 2026-02-04
+Stopped at: Completed 05-05-PLAN.md (Animated robot models - Phase 5 fully complete)
 Resume file: None
 
-**Phase 5 Complete:** Full enemy combat integration delivered. Added knockback velocity to PlayerController with exponential decay (8 units/sec force, horizontal-only). EnemyController fires OnAttackPlayer event with damage and knockback direction. EnemyManager fully integrated: explosion pooling, attack callback wiring, reset on game restart. BerzerkGame wires enemy spawn (3 initial enemies), update loop, projectile collisions, and rendering (enemies, explosions, health pickups). G key spawns test waves. Complete arcade combat loop: spawn → detect → chase → attack with knockback → destroy with explosion → drop pickups. All Phase 5 requirements met (AI-01 through AI-06, ANIM-05-08 placeholders). Ready for Phase 6 - Procedural Room Generation.
+**Phase 5 Fully Complete:** Animated robot enemies integrated with Mixamo models and FSM-driven animation transitions. Gap closure plan 05-05 added shared animation model pattern: EnemyRenderer loads idle.fbx, walk.fbx, bash.fbx once; EnemyManager wires models to controllers during spawn; EnemyController switches models on FSM state transitions (Idle→idle, Chase→walk, Attack→bash). All enemies share three AnimatedModel instances for memory efficiency. Player and enemies use same character model (test-character.fbx) with skeleton-only animations. Complete animated combat system: spawn → detect → chase (walk animation) → attack (bash animation) → destroy with explosion → drop pickups. All Phase 5 requirements met (AI-01 through AI-06, ANIM-05-08). Ready for Phase 6 - Procedural Room Generation.
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-03 (Phase 5 complete)*
+*Last updated: 2026-02-04 (Phase 5 fully complete with animated robots)*
