@@ -43,10 +43,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **AI-01**: Robot enemies spawn in room
 - [ ] **AI-02**: Robots detect player within proximity range
-- [ ] **AI-03**: Robots navigate toward player using pathfinding
+- [ ] **AI-03**: Robots navigate toward player (direct movement acceptable for single-room)
 - [ ] **AI-04**: Robots attack player on melee contact
 - [ ] **AI-05**: Robots can be destroyed by laser projectiles
-- [ ] **AI-06**: Destroyed robots disappear and award points
+- [ ] **AI-06**: Destroyed robots disappear (score points deferred to Phase 7 UI)
 
 ### Room & Level
 
