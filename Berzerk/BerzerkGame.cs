@@ -146,6 +146,10 @@ public class BerzerkGame : Game
         // Initialize enemy renderer
         _enemyRenderer = new EnemyRenderer(GraphicsDevice);
 
+        // Load shared robot animation models
+        _enemyRenderer.LoadRobotModels(Content);
+        _enemyManager.SetEnemyRenderer(_enemyRenderer);
+
         // Spawn initial enemy wave (3 enemies per CONTEXT)
         _enemyManager.SpawnWave(3, _playerController.Transform.Position);
         Console.WriteLine("Spawned initial wave: 3 enemies");

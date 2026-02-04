@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Berzerk.Source.Combat;
+using Berzerk.Graphics;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,7 @@ public class EnemyManager
     private List<EnemyController> _enemies;
     private Queue<EnemyController> _enemyPool;
     private TargetManager? _targetManager;
+    private EnemyRenderer? _enemyRenderer;
     private Random _random;
 
     // Explosion effects
@@ -85,6 +87,14 @@ public class EnemyManager
     public void SetTargetManager(TargetManager targetManager)
     {
         _targetManager = targetManager;
+    }
+
+    /// <summary>
+    /// Set enemy renderer to access shared animation models.
+    /// </summary>
+    public void SetEnemyRenderer(EnemyRenderer enemyRenderer)
+    {
+        _enemyRenderer = enemyRenderer;
     }
 
     /// <summary>
@@ -176,6 +186,13 @@ public class EnemyManager
             : new EnemyController();
 
         enemy.Activate(position);
+
+        // Assign shared animation models from renderer
+        if (_enemyRenderer != null)
+        {
+            var (idle, walk, attack) = _enemyRenderer.GetSharedModels();
+            enemy.SetAnimatedModels(idle, walk, attack);
+        }
 
         // Subscribe to death event for drop system
         enemy.Health.OnDeath += () => OnEnemyDeath(enemy);
