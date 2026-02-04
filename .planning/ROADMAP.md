@@ -125,10 +125,13 @@ Plans:
   4. Doors open automatically when all robots in current room are destroyed
   5. Player can walk through open doors to trigger room transition
   6. New room loads with fresh robot spawns when player transitions
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD (to be planned in /gsd:plan-phase 6)
+- [ ] 06-01-PLAN.md — Core room infrastructure (Room, Door, Direction, DoorState)
+- [ ] 06-02-PLAN.md — RoomManager for lifecycle and transition detection
+- [ ] 06-03-PLAN.md — RoomRenderer for door state visualization
+- [ ] 06-04-PLAN.md — Integration into BerzerkGame with progression loop
 
 ### Phase 7: UI & HUD
 **Goal**: Player has complete HUD showing all gameplay information
