@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Berzerk.Source.Core;
+using Berzerk.Graphics;
 using System;
 
 namespace Berzerk.Source.Enemies;
@@ -13,6 +14,12 @@ public class EnemyController
     public Transform Transform { get; }
     public EnemyHealth Health { get; }
     public bool IsActive { get; set; }
+
+    // Animated model references (shared instances from EnemyRenderer)
+    private AnimatedModel? _idleModel;
+    private AnimatedModel? _walkModel;
+    private AnimatedModel? _attackModel;
+    private AnimatedModel? _currentModel;
 
     // Movement settings (per CONTEXT: 70% of player's 5.0 speed)
     private const float MoveSpeed = 3.5f;
@@ -45,6 +52,22 @@ public class EnemyController
         // Subscribe to death event to trigger dying state
         Health.OnDeath += OnHealthDepleted;
     }
+
+    /// <summary>
+    /// Set animated models for all states (called by EnemyManager during spawn).
+    /// </summary>
+    public void SetAnimatedModels(AnimatedModel? idle, AnimatedModel? walk, AnimatedModel? attack)
+    {
+        _idleModel = idle;
+        _walkModel = walk;
+        _attackModel = attack;
+        _currentModel = idle; // Start with idle
+    }
+
+    /// <summary>
+    /// Get current animated model for rendering.
+    /// </summary>
+    public AnimatedModel? CurrentModel => _currentModel;
 
     /// <summary>
     /// Activate enemy at specified position (for pooling).
@@ -105,6 +128,9 @@ public class EnemyController
                 UpdateDyingState(deltaTime);
                 break;
         }
+
+        // Update current animation
+        _currentModel?.Update(gameTime);
     }
 
     private void UpdateIdleState(Vector3 playerPos)
@@ -212,6 +238,9 @@ public class EnemyController
 
     private void OnStateEnter(EnemyState state)
     {
+        // Switch animation model based on state
+        SetCurrentModel(state);
+
         switch (state)
         {
             case EnemyState.Attack:
@@ -222,6 +251,31 @@ public class EnemyController
                 _deathTimer = 0f;
                 _velocity = Vector3.Zero;
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Switch current animated model based on enemy state.
+    /// </summary>
+    private void SetCurrentModel(EnemyState state)
+    {
+        AnimatedModel? targetModel = state switch
+        {
+            EnemyState.Idle => _idleModel,
+            EnemyState.Chase => _walkModel,
+            EnemyState.Attack => _attackModel,
+            EnemyState.Dying => _currentModel, // Keep current model during death
+            _ => _idleModel
+        };
+
+        if (targetModel != null && targetModel != _currentModel)
+        {
+            _currentModel = targetModel;
+            var animNames = _currentModel.GetAnimationNames();
+            if (animNames.Count > 0)
+            {
+                _currentModel.PlayAnimation(animNames[0]);
+            }
         }
     }
 
