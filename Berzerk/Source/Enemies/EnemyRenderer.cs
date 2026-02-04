@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Berzerk.Source.Combat;
+using Berzerk.Graphics;
 
 namespace Berzerk.Source.Enemies;
 
@@ -22,6 +24,11 @@ public class EnemyRenderer
     private const int SPHERE_SEGMENTS = 8; // Low poly arcade style
     private const float HEALTH_PICKUP_RADIUS = 0.3f; // Per plan specification
 
+    // Shared robot animation models (loaded once, reused by all enemies)
+    private AnimatedModel? _idleModel;
+    private AnimatedModel? _walkModel;
+    private AnimatedModel? _attackModel;
+
     /// <summary>
     /// Initialize renderer with graphics device.
     /// </summary>
@@ -36,6 +43,33 @@ public class EnemyRenderer
             VertexColorEnabled = false,
             LightingEnabled = false
         };
+    }
+
+    /// <summary>
+    /// Load shared robot animation models (idle, walk, attack).
+    /// User confirmed: idle.fbx, walk.fbx, bash.fbx (skeleton-only animations without skin).
+    /// These are shared across all enemies to minimize memory usage.
+    /// </summary>
+    public void LoadRobotModels(ContentManager content)
+    {
+        _idleModel = new AnimatedModel();
+        _idleModel.LoadContent(content, "Models/idle");
+
+        _walkModel = new AnimatedModel();
+        _walkModel.LoadContent(content, "Models/walk");
+
+        _attackModel = new AnimatedModel();
+        _attackModel.LoadContent(content, "Models/bash");
+
+        Console.WriteLine("EnemyRenderer: Loaded shared robot animation models (idle, walk, bash)");
+    }
+
+    /// <summary>
+    /// Get shared animation models for enemy controllers.
+    /// </summary>
+    public (AnimatedModel? idle, AnimatedModel? walk, AnimatedModel? attack) GetSharedModels()
+    {
+        return (_idleModel, _walkModel, _attackModel);
     }
 
     /// <summary>
@@ -98,9 +132,8 @@ public class EnemyRenderer
     }
 
     /// <summary>
-    /// Draw enemies as colored cubes (placeholder rendering).
-    /// Robot Mixamo models will be loaded in Plan 04 integration.
-    /// Color indicates state: red=Chase, orange=Attack, gray=Dying.
+    /// Draw enemies using their current animated models.
+    /// Uses Mixamo robot models with same scale/rotation correction as player.
     /// </summary>
     public void DrawEnemies(IReadOnlyList<EnemyController> enemies, Matrix view, Matrix projection)
     {
@@ -108,11 +141,22 @@ public class EnemyRenderer
         {
             if (!enemy.IsActive) continue;
 
-            // Determine color based on state
-            Color stateColor = enemy.Health.IsDead ? Color.Gray :
-                              Color.Red; // Simplified: Red for active enemies
+            var model = enemy.CurrentModel;
+            if (model != null)
+            {
+                // Apply Mixamo scale and rotation correction (same as player)
+                Matrix modelScale = Matrix.CreateScale(0.01f); // Mixamo models are 100x too large
+                Matrix modelRotationCorrection = Matrix.CreateRotationY(MathHelper.Pi); // Face -Z
+                Matrix worldMatrix = modelScale * modelRotationCorrection * enemy.Transform.WorldMatrix;
 
-            DrawCube(enemy.Transform.Position, 1.0f, stateColor, view, projection);
+                model.Draw(_graphicsDevice, worldMatrix, view, projection);
+            }
+            else
+            {
+                // Fallback to cube if no model assigned (backward compatibility)
+                Color stateColor = enemy.Health.IsDead ? Color.Gray : Color.Red;
+                DrawCube(enemy.Transform.Position, 1.0f, stateColor, view, projection);
+            }
         }
     }
 
