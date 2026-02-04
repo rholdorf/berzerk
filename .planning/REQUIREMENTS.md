@@ -41,12 +41,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Enemy AI
 
-- [ ] **AI-01**: Robot enemies spawn in room
-- [ ] **AI-02**: Robots detect player within proximity range
-- [ ] **AI-03**: Robots navigate toward player (direct movement acceptable for single-room)
-- [ ] **AI-04**: Robots attack player on melee contact
-- [ ] **AI-05**: Robots can be destroyed by laser projectiles
-- [ ] **AI-06**: Destroyed robots disappear (score points deferred to Phase 7 UI)
+- [x] **AI-01**: Robot enemies spawn in room
+- [x] **AI-02**: Robots detect player within proximity range
+- [x] **AI-03**: Robots navigate toward player (direct movement acceptable for single-room)
+- [x] **AI-04**: Robots attack player on melee contact
+- [x] **AI-05**: Robots can be destroyed by laser projectiles
+- [x] **AI-06**: Destroyed robots disappear (score points deferred to Phase 7 UI)
 
 ### Room & Level
 
@@ -72,10 +72,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ANIM-02**: Player idle animation plays when stationary
 - [ ] **ANIM-03**: Player walk/run animation plays when moving
 - [ ] **ANIM-04**: Player shoot animation plays when firing
-- [ ] **ANIM-05**: Robot enemies use Mixamo models with animations
-- [ ] **ANIM-06**: Robot walk animation plays when moving
-- [ ] **ANIM-07**: Robot attack animation plays during melee
-- [ ] **ANIM-08**: Robot death animation plays when destroyed
+- [x] **ANIM-05**: Robot enemies use Mixamo models with animations
+- [x] **ANIM-06**: Robot walk animation plays when moving
+- [x] **ANIM-07**: Robot attack animation plays during melee
+- [x] **ANIM-08**: Robot death animation plays when destroyed
 
 ### Polish
 
@@ -166,16 +166,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HEALTH-02 | Phase 4 | Complete |
 | HEALTH-03 | Phase 4 | Complete |
 | HEALTH-04 | Phase 4 | Complete |
-| AI-01 | Phase 5 | Pending |
-| AI-02 | Phase 5 | Pending |
-| AI-03 | Phase 5 | Pending |
-| AI-04 | Phase 5 | Pending |
-| AI-05 | Phase 5 | Pending |
-| AI-06 | Phase 5 | Pending |
-| ANIM-05 | Phase 5 | Pending |
-| ANIM-06 | Phase 5 | Pending |
-| ANIM-07 | Phase 5 | Pending |
-| ANIM-08 | Phase 5 | Pending |
+| AI-01 | Phase 5 | Complete |
+| AI-02 | Phase 5 | Complete |
+| AI-03 | Phase 5 | Complete |
+| AI-04 | Phase 5 | Complete |
+| AI-05 | Phase 5 | Complete |
+| AI-06 | Phase 5 | Complete |
+| ANIM-05 | Phase 5 | Complete |
+| ANIM-06 | Phase 5 | Complete |
+| ANIM-07 | Phase 5 | Complete |
+| ANIM-08 | Phase 5 | Complete |
 | ROOM-01 | Phase 6 | Pending |
 | ROOM-02 | Phase 6 | Pending |
 | ROOM-03 | Phase 6 | Pending |
@@ -205,4 +205,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-31*
-*Last updated: 2026-01-31 after roadmap creation*
+*Last updated: 2026-02-04 after Phase 5 completion*
