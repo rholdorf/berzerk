@@ -37,6 +37,11 @@
 /processor:MixamoModelProcessor
 /build:Models/run.fbx
 
+#begin Models/bash.fbx
+/importer:FbxImporter
+/processor:MixamoModelProcessor
+/build:Models/bash.fbx
+
 #begin Font.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
