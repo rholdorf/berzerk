@@ -147,4 +147,16 @@ public class ProjectileManager
     {
         return _activeEffects.AsReadOnly();
     }
+
+    /// <summary>
+    /// Deactivate all active projectiles (for room transitions).
+    /// </summary>
+    public void DeactivateAll()
+    {
+        foreach (var projectile in _activeProjectiles)
+        {
+            projectile.Deactivate();
+        }
+        // Pool cleanup happens in next Update cycle
+    }
 }
