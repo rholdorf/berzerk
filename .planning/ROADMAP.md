@@ -15,9 +15,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Content Pipeline** - MonoGame project setup with working FBX import
 - [x] **Phase 2: Player Movement & Camera** - Third-person controls and camera system
 - [x] **Phase 3: Core Combat System** - Laser weapon shooting and projectile mechanics
-- [ ] **Phase 4: Player Health & Survival** - Damage system and death state
-- [ ] **Phase 5: Enemy AI & Combat** - Robot enemies with combat behavior
-- [ ] **Phase 6: Room System & Progression** - Room structure with door progression
+- [x] **Phase 4: Player Health & Survival** - Damage system and death state
+- [x] **Phase 5: Enemy AI & Combat** - Robot enemies with combat behavior
+- [x] **Phase 6: Room System & Progression** - Room structure with door progression
 - [ ] **Phase 7: UI & HUD** - Player feedback interface
 - [ ] **Phase 8: Animation & Visual Polish** - Character animations and effects
 
@@ -89,9 +89,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Health system and damage vignette
-- [ ] 04-02-PLAN.md — Death visuals, health bar, and game over screen
-- [ ] 04-03-PLAN.md — Integration and verification checkpoint
+- [x] 04-01-PLAN.md — Health system and damage vignette
+- [x] 04-02-PLAN.md — Death visuals, health bar, and game over screen
+- [x] 04-03-PLAN.md — Integration and verification checkpoint
 
 ### Phase 5: Enemy AI & Combat
 **Goal**: Robot enemies spawn, chase player, attack, and can be destroyed
@@ -112,7 +112,7 @@ Plans:
 - [x] 05-02-PLAN.md — Enemy manager and pickup integration
 - [x] 05-03-PLAN.md — Enemy visual components (ExplosionEffect, EnemyRenderer)
 - [x] 05-04-PLAN.md — Enemy system integration into BerzerkGame
-- [ ] 05-05-PLAN.md — Gap closure: Animated robot models and documentation update
+- [x] 05-05-PLAN.md — Gap closure: Animated robot models and documentation update
 
 ### Phase 6: Room System & Progression
 **Goal**: Player navigates through connected rooms with door progression
@@ -128,10 +128,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Core room infrastructure (Room, Door, Direction, DoorState)
-- [ ] 06-02-PLAN.md — RoomManager for lifecycle and transition detection
-- [ ] 06-03-PLAN.md — RoomRenderer for door state visualization
-- [ ] 06-04-PLAN.md — Integration into BerzerkGame with progression loop
+- [x] 06-01-PLAN.md — Core room infrastructure (Room, Door, Direction, DoorState)
+- [x] 06-02-PLAN.md — RoomManager for lifecycle and transition detection
+- [x] 06-03-PLAN.md — RoomRenderer for door state visualization
+- [x] 06-04-PLAN.md — Integration into BerzerkGame with progression loop
 
 ### Phase 7: UI & HUD
 **Goal**: Player has complete HUD showing all gameplay information
@@ -176,7 +176,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Core Combat System | 4/4 | Complete | 2026-02-02 |
 | 4. Player Health & Survival | 3/3 | Complete | 2026-02-03 |
 | 5. Enemy AI & Combat | 5/5 | Complete | 2026-02-04 |
-| 6. Room System & Progression | 0/? | Not started | - |
+| 6. Room System & Progression | 4/4 | Complete | 2026-02-08 |
 | 7. UI & HUD | 0/? | Not started | - |
 | 8. Animation & Visual Polish | 0/? | Not started | - |
 
