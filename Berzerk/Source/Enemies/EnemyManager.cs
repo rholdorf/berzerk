@@ -26,6 +26,7 @@ public class EnemyManager
     // Wave progression
     private int _currentWave = 0;
     private const int MAX_ENEMIES_PER_WAVE = 10;
+    private bool _allDefeatedFired = false;
 
     // Spawning settings
     private const float MIN_SPAWN_DISTANCE_FROM_PLAYER = 10f;
@@ -56,6 +57,11 @@ public class EnemyManager
 
     public int ActiveCount => _enemies.Count;
     public bool AllEnemiesDefeated => _enemies.Count == 0;
+
+    /// <summary>
+    /// Event fired when all enemies in room are defeated.
+    /// </summary>
+    public event Action OnAllEnemiesDefeated;
 
     /// <summary>
     /// Initialize enemy manager with pre-allocated pool.
@@ -102,6 +108,8 @@ public class EnemyManager
     /// </summary>
     public void SpawnWave(int enemyCount, Vector3 playerPos)
     {
+        _allDefeatedFired = false;
+
         for (int i = 0; i < enemyCount; i++)
         {
             Vector3? spawnPos = TryFindSpawnPosition(playerPos, MIN_SPAWN_DISTANCE_FROM_PLAYER, MAX_SPAWN_ATTEMPTS);
@@ -236,6 +244,13 @@ public class EnemyManager
             }
         }
 
+        // Fire all-defeated event once when enemies are cleared
+        if (_enemies.Count == 0 && !_allDefeatedFired && _currentWave > 0)
+        {
+            _allDefeatedFired = true;
+            OnAllEnemiesDefeated?.Invoke();
+        }
+
         // Update explosion effects
         foreach (var explosion in _activeExplosions)
         {
@@ -362,5 +377,6 @@ public class EnemyManager
 
         // Reset wave counter
         _currentWave = 0;
+        _allDefeatedFired = false;
     }
 }
