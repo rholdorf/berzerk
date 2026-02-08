@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Berzerk.Source.Combat;
+using Berzerk.Source.Rooms;
 
 namespace Berzerk.Source.Graphics;
 
@@ -175,5 +176,32 @@ public class DebugRenderer
                 DrawBoundingBox(box, view, projection, color);
             }
         }
+    }
+
+    /// <summary>
+    /// Draw a single door with color based on state.
+    /// Red = Closed, Yellow = Opening, Green = Open.
+    /// </summary>
+    public void DrawDoor(Door door, Matrix view, Matrix projection)
+    {
+        Color doorColor = door.State switch
+        {
+            DoorState.Closed => Color.Red,
+            DoorState.Opening => Color.Yellow,
+            DoorState.Open => Color.Green,
+            _ => Color.White
+        };
+
+        // Draw the collision box area (shows door frame)
+        DrawBoundingBox(door.CollisionBox, view, projection, doorColor);
+    }
+
+    /// <summary>
+    /// Draw door trigger volume for debugging (semi-transparent).
+    /// </summary>
+    public void DrawDoorTrigger(Door door, Matrix view, Matrix projection)
+    {
+        // Draw trigger volume in cyan for visibility
+        DrawBoundingBox(door.TriggerVolume, view, projection, Color.Cyan * 0.5f);
     }
 }
