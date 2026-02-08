@@ -9,6 +9,7 @@ using Berzerk.UI;
 using Berzerk.Source.Combat;
 using Berzerk.Source.Player;
 using Berzerk.Source.Enemies;
+using Berzerk.Source.Rooms;
 using System;
 using System.Collections.Generic;
 
@@ -29,7 +30,6 @@ public class BerzerkGame : Game
     private PlayerController _playerController;
     private ThirdPersonCamera _camera;
     private Crosshair _crosshair;
-    private List<BoundingBox> _testWalls;
     private DebugRenderer _debugRenderer;
 
     // Combat systems
@@ -50,6 +50,11 @@ public class BerzerkGame : Game
     // Enemy system
     private EnemyManager _enemyManager;
     private EnemyRenderer _enemyRenderer;
+
+    // Room system
+    private RoomManager _roomManager;
+    private RoomRenderer _roomRenderer;
+    private int _roomsCleared = 0;
 
     // Test animated model and animations
     private AnimatedModel _testCharacter;
@@ -101,6 +106,19 @@ public class BerzerkGame : Game
         _enemyManager.Initialize(20);
         _enemyManager.SetTargetManager(_targetManager);
 
+        // Initialize room system
+        _roomManager = new RoomManager();
+        _roomManager.Initialize();
+
+        // Wire room clear event
+        _roomManager.OnRoomCleared += () =>
+        {
+            Console.WriteLine("All doors are open! Find an exit.");
+        };
+
+        // Wire room transition event
+        _roomManager.OnRoomTransition += HandleRoomTransition;
+
         base.Initialize();
     }
 
@@ -134,12 +152,6 @@ public class BerzerkGame : Game
         _crosshair.LoadContent(GraphicsDevice);
         _debugRenderer = new DebugRenderer(GraphicsDevice);
 
-        // Set up test collision walls
-        _testWalls = ThirdPersonCamera.CreateTestWalls();
-        _camera.SetCollisionGeometry(_testWalls);
-        _projectileManager.SetWallColliders(_testWalls);
-        Console.WriteLine($"Camera collision geometry initialized with {_testWalls.Count} boxes");
-
         // Initialize projectile renderer after graphics device is ready
         _projectileRenderer = new ProjectileRenderer(GraphicsDevice);
 
@@ -149,6 +161,14 @@ public class BerzerkGame : Game
         // Load shared robot animation models
         _enemyRenderer.LoadRobotModels(Content);
         _enemyManager.SetEnemyRenderer(_enemyRenderer);
+
+        // Initialize room renderer
+        _roomRenderer = new RoomRenderer(GraphicsDevice);
+
+        // Set up room collision geometry (replaces test walls)
+        var roomColliders = _roomManager.GetCollisionGeometry();
+        _camera.SetCollisionGeometry(roomColliders);
+        _projectileManager.SetWallColliders(roomColliders);
 
         // Spawn initial enemy wave (3 enemies per CONTEXT)
         _enemyManager.SpawnWave(3, _playerController.Transform.Position);
@@ -162,6 +182,9 @@ public class BerzerkGame : Game
             _playerController.ApplyKnockback(direction, 8f); // 8 units/sec knockback force
             Console.WriteLine($"Enemy attacked! -{damage} HP");
         });
+
+        // Wire enemy manager to room manager for room clear detection
+        _enemyManager.OnAllEnemiesDefeated += _roomManager.HandleAllEnemiesDefeated;
 
         // Load health UI
         _damageVignette = new DamageVignette();
@@ -238,6 +261,9 @@ public class BerzerkGame : Game
         // Update enemy system
         _enemyManager.Update(gameTime, _playerController.Transform.Position);
         _enemyManager.CheckProjectileCollisions(_projectileManager.GetActiveProjectiles());
+
+        // Update room system (door animations, transition detection)
+        _roomManager.Update(deltaTime, _playerController.Transform.Position);
 
         // R key respawns targets (existing)
         if (_inputManager.IsKeyPressed(Keys.R))
@@ -336,6 +362,15 @@ public class BerzerkGame : Game
         _ammoSystem = new AmmoSystem();  // Reset ammo
         _weaponSystem = new WeaponSystem(_ammoSystem, _projectileManager);
 
+        // Reset room system
+        _roomManager.Reset();
+        _roomsCleared = 0;
+
+        // Update collision geometry
+        var roomColliders = _roomManager.GetCollisionGeometry();
+        _camera.SetCollisionGeometry(roomColliders);
+        _projectileManager.SetWallColliders(roomColliders);
+
         // Reset and respawn enemies
         _enemyManager.Reset();
         _enemyManager.SpawnWave(3, _playerController.Transform.Position);
@@ -350,6 +385,46 @@ public class BerzerkGame : Game
         Console.WriteLine("Game restarted!");
     }
 
+    private void HandleRoomTransition(Direction exitDirection)
+    {
+        _roomsCleared++;
+        Console.WriteLine($"Room {_roomsCleared} cleared! Entering new room...");
+
+        // Reset room state
+        _roomManager.TransitionToNewRoom();
+
+        // Clear projectiles (don't carry across rooms)
+        _projectileManager.DeactivateAll();
+
+        // Reset and respawn enemies with progressive difficulty
+        _enemyManager.Reset();
+        int enemyCount = Math.Min(3 + _roomsCleared, 10); // 3 base + 1 per room, max 10
+        _enemyManager.SpawnWave(enemyCount, _playerController.Transform.Position);
+
+        // Re-wire attack callback for new enemies
+        _enemyManager.SetAttackCallback((damage, direction) =>
+        {
+            if (_gameState != GameState.Playing) return;
+            _healthSystem.TakeDamage(damage);
+            _playerController.ApplyKnockback(direction, 8f);
+            Console.WriteLine($"Enemy attacked! -{damage} HP");
+        });
+
+        // Re-wire room clear event for new wave
+        // (Already wired to _roomManager.HandleAllEnemiesDefeated)
+
+        // Update collision geometry (door states changed)
+        var roomColliders = _roomManager.GetCollisionGeometry();
+        _camera.SetCollisionGeometry(roomColliders);
+        _projectileManager.SetWallColliders(roomColliders);
+
+        // Move player to entry position
+        Vector3 spawnPos = _roomManager.GetSpawnPositionForEntry(exitDirection);
+        _playerController.Transform.Position = spawnPos;
+
+        Console.WriteLine($"Spawned {enemyCount} enemies. Player at {spawnPos}");
+    }
+
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -360,8 +435,8 @@ public class BerzerkGame : Game
             // Draw floor grid
             _debugRenderer.DrawFloor(_camera.ViewMatrix, _camera.ProjectionMatrix);
 
-            // Draw collision walls
-            _debugRenderer.DrawBoundingBoxes(_testWalls, _camera.ViewMatrix, _camera.ProjectionMatrix, Color.White);
+            // Draw room (walls and doors)
+            _roomRenderer.Draw(_roomManager.CurrentRoom, _camera.ViewMatrix, _camera.ProjectionMatrix);
 
             // Draw combat elements
             _projectileRenderer.Draw(_projectileManager.GetActiveProjectiles(), _camera.ViewMatrix, _camera.ProjectionMatrix);
