@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** Combate arcade intenso em salas geradas proceduralmente - a essência do Berzerk original transportada para 3D moderno com modelos animados.
-**Current focus:** Ready for Phase 5 - Enemy AI & Combat
+**Current focus:** Phase 6 - Room System & Progression
 
 ## Current Position
 
-Phase: 5 of 8 COMPLETE (Enemy AI & Combat)
-Plan: 5 of 5 complete in Phase 5
-Status: Phase 5 complete - animated robot enemies with full FSM integration
-Last activity: 2026-02-04 — Completed 05-05-PLAN.md (Animated robot models and gap closure)
+Phase: 6 of 8 (Room System & Progression)
+Plan: 1 of 5 complete in Phase 6
+Status: In progress - room data structures complete, manager integration next
+Last activity: 2026-02-08 — Completed 06-01-PLAN.md (Room infrastructure with walls, doors, spawn points)
 
-Progress: [██████████░░] 71% (5 phases complete, 20 of ~28 total plans)
+Progress: [███████████░] 75% (5 phases complete + 1 plan, 21 of ~28 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: 15.7 min
-- Total execution time: 5.48 hours
+- Total plans completed: 21
+- Average duration: 14.6 min
+- Total execution time: 5.53 hours
 
 **By Phase:**
 
@@ -32,16 +32,13 @@ Progress: [██████████░░] 71% (5 phases complete, 20 of ~
 | 03 - Core Combat System | 4 | 15.0 min | 3.8 min |
 | 04 - Player Health & Survival | 3 | 7.0 min | 2.3 min |
 | 05 - Enemy AI & Combat | 5 | 16.0 min | 3.2 min |
-| **Phase 5 breakdown** | | | |
-| 05-01 (Core Enemy Infrastructure) | 1 | 3.0 min | 3.0 min |
-| 05-02 (Enemy Manager & Pickup Integration) | 1 | 3.0 min | 3.0 min |
-| 05-03 (Enemy Visual Components) | 1 | 4.0 min | 4.0 min |
-| 05-04 (Enemy System Integration) | 1 | 4.0 min | 4.0 min |
-| 05-05 (Animated Robot Models) | 1 | 2.0 min | 2.0 min |
+| 06 - Room System & Progression | 1 | 2.0 min | 2.0 min |
+| **Phase 6 breakdown** | | | |
+| 06-01 (Room Infrastructure) | 1 | 2.0 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (3 min), 05-02 (3 min), 05-03 (4 min), 05-04 (4 min), 05-05 (2 min)
-- Trend: Pure code generation plans very fast (2-4 min), integration plans consistent (4 min)
+- Last 5 plans: 05-02 (3 min), 05-03 (4 min), 05-04 (4 min), 05-05 (2 min), 06-01 (2 min)
+- Trend: Pure data structure plans extremely fast (2 min), code generation plans fast (3-4 min)
 
 *Updated after each plan completion*
 
@@ -150,6 +147,11 @@ Recent decisions affecting current work:
 - 05-05: Shared animation model pattern: load once, reuse across all enemy instances
 - 05-05: FSM-driven animation switching: SetCurrentModel() in OnStateEnter()
 - 05-05: Model assignment flow: Renderer loads → Manager receives → spawn wires to controllers
+- 06-01: Enum state machine for doors (vs class-based State pattern) - simpler for states without per-state data
+- 06-01: Trigger volumes extend INTO room (not outside) to detect player approaching from inside
+- 06-01: Door.GetActiveCollision() returns null when Open for dynamic collision list building
+- 06-01: 30x30 room with 4 cardinal doors matches existing game area dimensions
+- 06-01: Room as passive data container - no Update/Draw logic (RoomManager handles)
 
 ### Pending Todos
 
@@ -174,12 +176,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-04
-Stopped at: Completed 05-05-PLAN.md (Animated robot models - Phase 5 fully complete)
+Last session: 2026-02-08
+Stopped at: Completed 06-01-PLAN.md (Room infrastructure - data structures ready for manager)
 Resume file: None
 
-**Phase 5 Fully Complete:** Animated robot enemies integrated with Mixamo models and FSM-driven animation transitions. Gap closure plan 05-05 added shared animation model pattern: EnemyRenderer loads idle.fbx, walk.fbx, bash.fbx once; EnemyManager wires models to controllers during spawn; EnemyController switches models on FSM state transitions (Idle→idle, Chase→walk, Attack→bash). All enemies share three AnimatedModel instances for memory efficiency. Player and enemies use same character model (test-character.fbx) with skeleton-only animations. Complete animated combat system: spawn → detect → chase (walk animation) → attack (bash animation) → destroy with explosion → drop pickups. All Phase 5 requirements met (AI-01 through AI-06, ANIM-05-08). Ready for Phase 6 - Procedural Room Generation.
+**Phase 6 Started:** Room system foundation complete with passive data structures. Room class holds BoundingBox walls with door openings, 4 cardinal doors with FSM (Closed/Opening/Open), and 8 enemy spawn points. Door class provides trigger volumes for player entry detection and collision boxes that deactivate when open. Direction and DoorState enums provide foundation for room navigation. Ready for Plan 06-02 (RoomManager) to wire room lifecycle: initialization → enemy spawns → OnAllEnemiesDefeated → door opening → player entry detection → room transitions.
 
 ---
 *State initialized: 2026-01-31*
-*Last updated: 2026-02-04 (Phase 5 fully complete with animated robots)*
+*Last updated: 2026-02-08 (Phase 6 plan 01 complete - room data structures)*
