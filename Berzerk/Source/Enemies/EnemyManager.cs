@@ -50,6 +50,11 @@ public class EnemyManager
     public event Action OnAllEnemiesDefeated;
 
     /// <summary>
+    /// Event fired when a single enemy is killed (for score tracking).
+    /// </summary>
+    public event Action? OnEnemyKilled;
+
+    /// <summary>
     /// Initialize enemy manager with pre-allocated pool.
     /// </summary>
     public void Initialize(int poolSize = 20)
@@ -275,6 +280,9 @@ public class EnemyManager
     /// </summary>
     private void OnEnemyDeath(EnemyController enemy)
     {
+        // Fire per-kill event for score tracking
+        OnEnemyKilled?.Invoke();
+
         // Spawn explosion effect
         SpawnExplosion(enemy.Transform.Position);
 

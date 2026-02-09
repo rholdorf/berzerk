@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace Berzerk.UI;
 
@@ -14,11 +15,43 @@ public class HealthBar
     private const int BarY = 20;
     private const int BorderWidth = 2;
 
+    // Flash effect
+    private bool _isFlashing;
+    private float _flashAlpha;
+    private const float FlashDuration = 0.4f;
+
     public void LoadContent(GraphicsDevice graphicsDevice)
     {
         // Create 1x1 white pixel texture
         _pixelTexture = new Texture2D(graphicsDevice, 1, 1);
         _pixelTexture.SetData(new[] { Color.White });
+    }
+
+    /// <summary>
+    /// Trigger damage flash effect (coordinated with DamageVignette).
+    /// </summary>
+    public void Trigger()
+    {
+        _isFlashing = true;
+        _flashAlpha = 1.0f;
+    }
+
+    /// <summary>
+    /// Update flash effect with exponential decay.
+    /// </summary>
+    public void Update(float deltaTime)
+    {
+        if (!_isFlashing) return;
+
+        // Exponential decay
+        _flashAlpha *= (float)Math.Pow(0.01, deltaTime / FlashDuration);
+
+        // Stop flashing when alpha is negligible
+        if (_flashAlpha < 0.01f)
+        {
+            _flashAlpha = 0f;
+            _isFlashing = false;
+        }
     }
 
     public void Draw(SpriteBatch spriteBatch, int currentHealth, int maxHealth)
@@ -54,6 +87,14 @@ public class HealthBar
             spriteBatch.Draw(_pixelTexture,
                 new Rectangle(BarX, BarY, fillWidth, BarHeight),
                 fillColor);
+        }
+
+        // Draw red flash overlay when flashing
+        if (_isFlashing && _flashAlpha > 0)
+        {
+            spriteBatch.Draw(_pixelTexture,
+                new Rectangle(BarX, BarY, fillWidth, BarHeight),
+                Color.Red * _flashAlpha);
         }
     }
 }
