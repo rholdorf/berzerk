@@ -24,18 +24,20 @@ public class StartMenu
         _pixelTexture.SetData(new[] { Color.White });
     }
 
-    public void Update(MouseState currentMouse, MouseState previousMouse, Viewport viewport)
+    public void Update(MouseState currentMouse, MouseState previousMouse, Viewport viewport, GameWindow window)
     {
-        // Mouse coordinates are already in client area space (relative to window content)
-        Point mousePos = currentMouse.Position;
+        // On macOS, Mouse.GetState() returns window-relative coordinates
+        // Use X and Y directly (they are already in client space)
+        Point mousePos = new Point(currentMouse.X, currentMouse.Y);
 
         // Check if mouse is hovering over button
+        bool wasHovering = _isHovering;
         _isHovering = _buttonBounds.Contains(mousePos);
 
-        // DEBUG: Log when hovering or clicking
-        if (_isHovering)
+        // DEBUG: Log only when hovering state changes or mouse moves
+        if (_isHovering != wasHovering || mousePos != previousMouse.Position)
         {
-            Console.WriteLine($"HOVERING - Mouse: {mousePos}, Bounds: {_buttonBounds}, Button: {previousMouse.LeftButton} -> {currentMouse.LeftButton}");
+            Console.WriteLine($"Mouse: {mousePos}, Bounds: {_buttonBounds}, Hovering: {_isHovering}");
         }
 
         // Detect click: released after being pressed while hovering

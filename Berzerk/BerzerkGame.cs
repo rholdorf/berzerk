@@ -82,8 +82,8 @@ public class BerzerkGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;  // Show cursor for main menu
 
-        // Center window on screen to ensure proper mouse coordinates
-        Window.Position = new Point(100, 100);
+        // On macOS, allow user to resize window (helps with mouse coordinate tracking)
+        Window.AllowUserResizing = false;
     }
 
     protected override void Initialize()
@@ -232,6 +232,9 @@ public class BerzerkGame : Game
         _pauseMenu = new PauseMenu();
         _pauseMenu.LoadContent(Content, GraphicsDevice);
 
+        // On macOS, initialize mouse position to center of window to "wake up" mouse tracking
+        Mouse.SetPosition(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+
         // Wire menu events
         _startMenu.OnStartGame += () =>
         {
@@ -291,7 +294,7 @@ public class BerzerkGame : Game
         {
             case GameState.MainMenu:
                 MouseState menuMouse = Mouse.GetState();
-                _startMenu.Update(menuMouse, _previousMouseState, GraphicsDevice.Viewport);
+                _startMenu.Update(menuMouse, _previousMouseState, GraphicsDevice.Viewport, Window);
                 _previousMouseState = menuMouse;
                 break;
 
