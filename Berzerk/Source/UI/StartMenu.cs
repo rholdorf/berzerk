@@ -31,21 +31,13 @@ public class StartMenu
         Point mousePos = new Point(currentMouse.X, currentMouse.Y);
 
         // Check if mouse is hovering over button
-        bool wasHovering = _isHovering;
         _isHovering = _buttonBounds.Contains(mousePos);
-
-        // DEBUG: Log only when hovering state changes or mouse moves
-        if (_isHovering != wasHovering || mousePos != previousMouse.Position)
-        {
-            Console.WriteLine($"Mouse: {mousePos}, Bounds: {_buttonBounds}, Hovering: {_isHovering}");
-        }
 
         // Detect click: released after being pressed while hovering
         if (_isHovering &&
             currentMouse.LeftButton == ButtonState.Released &&
             previousMouse.LeftButton == ButtonState.Pressed)
         {
-            Console.WriteLine("*** CLICK DETECTED - Firing OnStartGame event ***");
             OnStartGame?.Invoke();
         }
     }
