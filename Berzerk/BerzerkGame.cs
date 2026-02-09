@@ -171,7 +171,7 @@ public class BerzerkGame : Game
         _projectileManager.SetWallColliders(roomColliders);
 
         // Spawn initial enemy wave (3 enemies per CONTEXT)
-        _enemyManager.SpawnWave(3, _playerController.Transform.Position);
+        _enemyManager.SpawnWave(3, _playerController.Transform.Position, _roomManager.GetEnemySpawnPoints());
         Console.WriteLine("Spawned initial wave: 3 enemies");
 
         // Wire enemy attacks to player damage and knockback
@@ -276,7 +276,7 @@ public class BerzerkGame : Game
         if (_inputManager.IsKeyPressed(Keys.G))
         {
             int waveSize = 3;
-            _enemyManager.SpawnWave(waveSize, _playerController.Transform.Position);
+            _enemyManager.SpawnWave(waveSize, _playerController.Transform.Position, _roomManager.GetEnemySpawnPoints());
             _enemyManager.SetAttackCallback((damage, direction) =>
             {
                 if (_gameState != GameState.Playing) return;
@@ -373,7 +373,7 @@ public class BerzerkGame : Game
 
         // Reset and respawn enemies
         _enemyManager.Reset();
-        _enemyManager.SpawnWave(3, _playerController.Transform.Position);
+        _enemyManager.SpawnWave(3, _playerController.Transform.Position, _roomManager.GetEnemySpawnPoints());
         _enemyManager.SetAttackCallback((damage, direction) =>
         {
             if (_gameState != GameState.Playing) return;
@@ -399,7 +399,7 @@ public class BerzerkGame : Game
         // Reset and respawn enemies with progressive difficulty
         _enemyManager.Reset();
         int enemyCount = Math.Min(3 + _roomsCleared, 10); // 3 base + 1 per room, max 10
-        _enemyManager.SpawnWave(enemyCount, _playerController.Transform.Position);
+        _enemyManager.SpawnWave(enemyCount, _playerController.Transform.Position, _roomManager.GetEnemySpawnPoints());
 
         // Re-wire attack callback for new enemies
         _enemyManager.SetAttackCallback((damage, direction) =>
