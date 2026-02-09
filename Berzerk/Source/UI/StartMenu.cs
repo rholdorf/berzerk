@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Berzerk.Source.Input;
 using System;
 
 namespace Berzerk.UI;
@@ -12,33 +13,54 @@ public class StartMenu
     private Texture2D _pixelTexture;
     private Rectangle _buttonBounds;
     private bool _isHovering;
+    private InputManager _inputManager;
+    private float _timeElapsed = 0f;
+    private bool _hasStarted = false;
 
     public event Action? OnStartGame;
 
-    public void LoadContent(ContentManager content, GraphicsDevice graphicsDevice)
+    public void LoadContent(ContentManager content, GraphicsDevice graphicsDevice, InputManager inputManager)
     {
         _font = content.Load<SpriteFont>("Font");
+        _inputManager = inputManager;
 
         // Create 1x1 pixel texture for button backgrounds
         _pixelTexture = new Texture2D(graphicsDevice, 1, 1);
         _pixelTexture.SetData(new[] { Color.White });
     }
 
-    public void Update(MouseState currentMouse, MouseState previousMouse, Viewport viewport, GameWindow window)
+    public void Update(Viewport viewport, float deltaTime)
     {
-        // On macOS, Mouse.GetState() returns window-relative coordinates
-        // Use X and Y directly (they are already in client space)
-        Point mousePos = new Point(currentMouse.X, currentMouse.Y);
+        if (_hasStarted) return;
 
-        // Check if mouse is hovering over button
-        _isHovering = _buttonBounds.Contains(mousePos);
+        // WORKAROUND for macOS MonoGame input bug: Auto-start after 3 seconds
+        // macOS MonoGame has known issues with Keyboard/Mouse.GetState() not working on initial window load
+        // This ensures the game is playable even if input doesn't work
+        _timeElapsed += deltaTime;
+        if (_timeElapsed >= 3f)
+        {
+            Console.WriteLine("Auto-starting game (macOS input workaround)");
+            OnStartGame?.Invoke();
+            _hasStarted = true;
+            return;
+        }
 
-        // Detect click: released after being pressed while hovering
-        if (_isHovering &&
-            currentMouse.LeftButton == ButtonState.Released &&
-            previousMouse.LeftButton == ButtonState.Pressed)
+        // Try input detection (works after window gains focus on some macOS configurations)
+        if (_inputManager.IsKeyPressed(Keys.Enter) || _inputManager.IsKeyPressed(Keys.Space))
         {
             OnStartGame?.Invoke();
+            _hasStarted = true;
+            return;
+        }
+
+        // Try mouse click detection
+        Point mousePos = _inputManager.MousePosition;
+        _isHovering = _buttonBounds.Contains(mousePos);
+
+        if (_isHovering && _inputManager.IsLeftMousePressed())
+        {
+            OnStartGame?.Invoke();
+            _hasStarted = true;
         }
     }
 
@@ -54,13 +76,23 @@ public class StartMenu
         Vector2 titleSize = _font.MeasureString(titleText);
         Vector2 titlePosition = new Vector2(
             viewport.Width / 2f - titleSize.X / 2f,
-            viewport.Height / 2f - 80
+            viewport.Height / 2f - 120
         );
         spriteBatch.DrawString(_font, titleText, titlePosition, Color.White);
 
-        // Draw "Start Game" button
+        // Draw instruction text with countdown
+        int countdown = (int)Math.Ceiling(3f - _timeElapsed);
+        string instructionText = $"Starting in {countdown}... (or press ENTER/SPACE/click)";
+        Vector2 instructionSize = _font.MeasureString(instructionText);
+        Vector2 instructionPosition = new Vector2(
+            viewport.Width / 2f - instructionSize.X / 2f,
+            viewport.Height / 2f - 40
+        );
+        spriteBatch.DrawString(_font, instructionText, instructionPosition, Color.Gray);
+
+        // Draw "Start Game" button (kept for mouse users)
         string buttonText = "Start Game";
-        float buttonCenterY = viewport.Height / 2f + 20;
+        float buttonCenterY = viewport.Height / 2f + 40;
         DrawButton(spriteBatch, buttonText, buttonCenterY, _isHovering, out _buttonBounds, viewport);
     }
 

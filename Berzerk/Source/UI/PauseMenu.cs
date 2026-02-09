@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using Berzerk.Source.Input;
 using System;
 
 namespace Berzerk.UI;
@@ -14,37 +14,38 @@ public class PauseMenu
     private Rectangle _quitButton;
     private bool _isHoveringResume;
     private bool _isHoveringQuit;
+    private InputManager _inputManager;
 
     public event Action? OnResume;
     public event Action? OnQuit;
 
-    public void LoadContent(ContentManager content, GraphicsDevice graphicsDevice)
+    public void LoadContent(ContentManager content, GraphicsDevice graphicsDevice, InputManager inputManager)
     {
         _font = content.Load<SpriteFont>("Font");
+        _inputManager = inputManager;
 
         // Create 1x1 pixel texture for backgrounds and buttons
         _pixelTexture = new Texture2D(graphicsDevice, 1, 1);
         _pixelTexture.SetData(new[] { Color.White });
     }
 
-    public void Update(MouseState currentMouse, MouseState previousMouse)
+    public void Update()
     {
+        // Use InputManager for reliable mouse input on all platforms
+        Point mousePos = _inputManager.MousePosition;
+
         // Check hover state for both buttons
-        _isHoveringResume = _resumeButton.Contains(currentMouse.Position);
-        _isHoveringQuit = _quitButton.Contains(currentMouse.Position);
+        _isHoveringResume = _resumeButton.Contains(mousePos);
+        _isHoveringQuit = _quitButton.Contains(mousePos);
 
         // Detect click on Resume button
-        if (_isHoveringResume &&
-            currentMouse.LeftButton == ButtonState.Released &&
-            previousMouse.LeftButton == ButtonState.Pressed)
+        if (_isHoveringResume && _inputManager.IsLeftMousePressed())
         {
             OnResume?.Invoke();
         }
 
         // Detect click on Quit button
-        if (_isHoveringQuit &&
-            currentMouse.LeftButton == ButtonState.Released &&
-            previousMouse.LeftButton == ButtonState.Pressed)
+        if (_isHoveringQuit && _inputManager.IsLeftMousePressed())
         {
             OnQuit?.Invoke();
         }

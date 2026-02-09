@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using Berzerk.Source.Input;
 using System;
 
 namespace Berzerk.UI;
@@ -16,14 +16,16 @@ public class GameOverScreen
     private Rectangle _quitButton;
     private bool _isHoveringRestart;
     private bool _isHoveringQuit;
+    private InputManager _inputManager;
 
     // Events
     public event Action? OnRestart;
     public event Action? OnQuit;
 
-    public void LoadContent(ContentManager content, GraphicsDevice graphicsDevice)
+    public void LoadContent(ContentManager content, GraphicsDevice graphicsDevice, InputManager inputManager)
     {
         _font = content.Load<SpriteFont>("Font");
+        _inputManager = inputManager;
 
         // Create 1x1 pixel for background
         _pixelTexture = new Texture2D(graphicsDevice, 1, 1);
@@ -33,19 +35,17 @@ public class GameOverScreen
     /// <summary>
     /// Update button hover and click detection.
     /// </summary>
-    public void Update(MouseState currentMouse, MouseState previousMouse)
+    public void Update()
     {
-        Point mousePos = currentMouse.Position;
+        // Use InputManager for reliable mouse input on all platforms
+        Point mousePos = _inputManager.MousePosition;
 
         // Update hover states
         _isHoveringRestart = _restartButton.Contains(mousePos);
         _isHoveringQuit = _quitButton.Contains(mousePos);
 
-        // Detect clicks (released after pressed)
-        bool wasPressed = previousMouse.LeftButton == ButtonState.Pressed;
-        bool isReleased = currentMouse.LeftButton == ButtonState.Released;
-
-        if (wasPressed && isReleased)
+        // Detect clicks
+        if (_inputManager.IsLeftMousePressed())
         {
             if (_isHoveringRestart)
             {

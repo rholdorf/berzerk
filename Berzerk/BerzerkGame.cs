@@ -58,7 +58,6 @@ public class BerzerkGame : Game
     // Menu screens
     private StartMenu _startMenu;
     private PauseMenu _pauseMenu;
-    private MouseState _previousMouseState;
 
     // Enemy system
     private EnemyManager _enemyManager;
@@ -84,6 +83,7 @@ public class BerzerkGame : Game
 
         // On macOS, allow user to resize window (helps with mouse coordinate tracking)
         Window.AllowUserResizing = false;
+        Window.Title = "BERZERK";  // Set window title explicitly
     }
 
     protected override void Initialize()
@@ -213,7 +213,7 @@ public class BerzerkGame : Game
         _healthBar.LoadContent(GraphicsDevice);
 
         _gameOverScreen = new GameOverScreen();
-        _gameOverScreen.LoadContent(Content, GraphicsDevice);
+        _gameOverScreen.LoadContent(Content, GraphicsDevice, _inputManager);
 
         // Load HUD elements
         _ammoCounter = new AmmoCounter();
@@ -227,10 +227,10 @@ public class BerzerkGame : Game
 
         // Load menu screens
         _startMenu = new StartMenu();
-        _startMenu.LoadContent(Content, GraphicsDevice);
+        _startMenu.LoadContent(Content, GraphicsDevice, _inputManager);
 
         _pauseMenu = new PauseMenu();
-        _pauseMenu.LoadContent(Content, GraphicsDevice);
+        _pauseMenu.LoadContent(Content, GraphicsDevice, _inputManager);
 
         // On macOS, initialize mouse position to center of window to "wake up" mouse tracking
         Mouse.SetPosition(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
@@ -238,11 +238,9 @@ public class BerzerkGame : Game
         // Wire menu events
         _startMenu.OnStartGame += () =>
         {
-            Console.WriteLine("OnStartGame EVENT FIRED - transitioning to Playing");
             _gameState = GameState.Playing;
             IsMouseVisible = false;
         };
-        Console.WriteLine("StartMenu.OnStartGame event subscribed");
 
         _pauseMenu.OnResume += () =>
         {
@@ -293,9 +291,7 @@ public class BerzerkGame : Game
         switch (_gameState)
         {
             case GameState.MainMenu:
-                MouseState menuMouse = Mouse.GetState();
-                _startMenu.Update(menuMouse, _previousMouseState, GraphicsDevice.Viewport, Window);
-                _previousMouseState = menuMouse;
+                _startMenu.Update(GraphicsDevice.Viewport, deltaTime);
                 break;
 
             case GameState.Playing:
@@ -312,9 +308,7 @@ public class BerzerkGame : Game
 
             case GameState.Paused:
                 // No ESC to unpause - only Resume button unpauses (per user decision)
-                MouseState pauseMouse = Mouse.GetState();
-                _pauseMenu.Update(pauseMouse, _previousMouseState);
-                _previousMouseState = pauseMouse;
+                _pauseMenu.Update();
                 break;
 
             case GameState.Dying:
@@ -323,9 +317,7 @@ public class BerzerkGame : Game
 
             case GameState.GameOver:
                 IsMouseVisible = true;
-                MouseState goMouse = Mouse.GetState();
-                _gameOverScreen.Update(goMouse, _previousMouseState);
-                _previousMouseState = goMouse;
+                _gameOverScreen.Update();
                 break;
         }
 
