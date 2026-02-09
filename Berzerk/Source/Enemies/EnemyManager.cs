@@ -33,21 +33,7 @@ public class EnemyManager
     private const float MIN_SPAWN_DISTANCE_BETWEEN_ENEMIES = 3f;
     private const int MAX_SPAWN_ATTEMPTS = 20;
 
-    // Room bounds
-    private const float ROOM_MIN_X = -10f;
-    private const float ROOM_MAX_X = 10f;
-    private const float ROOM_MIN_Z = -10f;
-    private const float ROOM_MAX_Z = 10f;
     private const float SPAWN_Y = 0.5f;
-
-    // Predefined safe spawn zones (corners)
-    private readonly Vector3[] _safeZones = new[]
-    {
-        new Vector3(-8f, SPAWN_Y, -8f),
-        new Vector3(8f, SPAWN_Y, -8f),
-        new Vector3(-8f, SPAWN_Y, 8f),
-        new Vector3(8f, SPAWN_Y, 8f),
-    };
 
     // Drop settings (per CONTEXT: 30-40% chance, using 35%)
     private const float DROP_CHANCE = 0.35f;
@@ -104,25 +90,50 @@ public class EnemyManager
     }
 
     /// <summary>
-    /// Spawn wave of enemies at safe distances from player.
+    /// Spawn wave of enemies at room-defined spawn points.
     /// </summary>
-    public void SpawnWave(int enemyCount, Vector3 playerPos)
+    public void SpawnWave(int enemyCount, Vector3 playerPos, List<Vector3> spawnPoints)
     {
         _allDefeatedFired = false;
 
         for (int i = 0; i < enemyCount; i++)
         {
-            Vector3? spawnPos = TryFindSpawnPosition(playerPos, MIN_SPAWN_DISTANCE_FROM_PLAYER, MAX_SPAWN_ATTEMPTS);
+            // Cycle through spawn points, skipping those too close to player
+            Vector3 spawnPos = Vector3.Zero;
+            bool found = false;
 
-            if (spawnPos.HasValue)
+            for (int j = 0; j < spawnPoints.Count; j++)
             {
-                SpawnEnemy(spawnPos.Value);
+                int idx = (i + j) % spawnPoints.Count;
+                Vector3 candidate = spawnPoints[idx];
+
+                if (Vector3.Distance(candidate, playerPos) >= MIN_SPAWN_DISTANCE_FROM_PLAYER)
+                {
+                    spawnPos = candidate;
+                    found = true;
+                    break;
+                }
             }
-            else
+
+            if (!found && spawnPoints.Count > 0)
             {
-                // Fallback to safe zone if random spawning fails
-                Vector3 safeZone = _safeZones[i % _safeZones.Length];
-                SpawnEnemy(safeZone);
+                // All points too close to player, use the one furthest away
+                float maxDist = 0;
+                foreach (var pt in spawnPoints)
+                {
+                    float dist = Vector3.Distance(pt, playerPos);
+                    if (dist > maxDist)
+                    {
+                        maxDist = dist;
+                        spawnPos = pt;
+                    }
+                }
+                found = true;
+            }
+
+            if (found)
+            {
+                SpawnEnemy(spawnPos);
             }
         }
     }
@@ -130,11 +141,11 @@ public class EnemyManager
     /// <summary>
     /// Start next wave with progressive difficulty.
     /// </summary>
-    public void StartNextWave(Vector3 playerPos)
+    public void StartNextWave(Vector3 playerPos, List<Vector3> spawnPoints)
     {
         _currentWave++;
         int enemyCount = GetWaveEnemyCount();
-        SpawnWave(enemyCount, playerPos);
+        SpawnWave(enemyCount, playerPos, spawnPoints);
     }
 
     /// <summary>
@@ -143,45 +154,6 @@ public class EnemyManager
     private int GetWaveEnemyCount()
     {
         return Math.Min(2 + _currentWave, MAX_ENEMIES_PER_WAVE);
-    }
-
-    /// <summary>
-    /// Try to find valid spawn position with minimum distance checks.
-    /// Returns null if no valid position found after maxAttempts.
-    /// </summary>
-    private Vector3? TryFindSpawnPosition(Vector3 playerPos, float minDistance, int maxAttempts = 20)
-    {
-        for (int attempt = 0; attempt < maxAttempts; attempt++)
-        {
-            // Random position within room bounds
-            float x = (float)(_random.NextDouble() * (ROOM_MAX_X - ROOM_MIN_X) + ROOM_MIN_X);
-            float z = (float)(_random.NextDouble() * (ROOM_MAX_Z - ROOM_MIN_Z) + ROOM_MIN_Z);
-            Vector3 candidate = new Vector3(x, SPAWN_Y, z);
-
-            // Check distance to player
-            if (Vector3.Distance(candidate, playerPos) < minDistance)
-            {
-                continue;
-            }
-
-            // Check distance to existing enemies
-            bool tooCloseToEnemy = false;
-            foreach (var enemy in _enemies)
-            {
-                if (Vector3.Distance(candidate, enemy.Transform.Position) < MIN_SPAWN_DISTANCE_BETWEEN_ENEMIES)
-                {
-                    tooCloseToEnemy = true;
-                    break;
-                }
-            }
-
-            if (!tooCloseToEnemy)
-            {
-                return candidate;
-            }
-        }
-
-        return null;
     }
 
     /// <summary>
