@@ -59,12 +59,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### UI & HUD
 
-- [ ] **UI-01**: Crosshair/reticle displays at screen center
-- [ ] **UI-02**: Health bar displays current HP
-- [ ] **UI-03**: Ammo counter displays current ammunition
-- [ ] **UI-04**: Score counter displays current points
-- [ ] **UI-05**: Game over screen displays final score
-- [ ] **UI-06**: Simple start menu to begin game
+- [x] **UI-01**: Crosshair/reticle displays at screen center
+- [x] **UI-02**: Health bar displays current HP
+- [x] **UI-03**: Ammo counter displays current ammunition
+- [x] **UI-04**: Score counter displays current points
+- [x] **UI-05**: Game over screen displays final score
+- [x] **UI-06**: Simple start menu to begin game
 
 ### Animation & Visuals
 
@@ -182,12 +182,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROOM-04 | Phase 6 | Complete |
 | ROOM-05 | Phase 6 | Complete |
 | ROOM-06 | Phase 6 | Complete |
-| UI-01 | Phase 7 | Pending |
-| UI-02 | Phase 7 | Pending |
-| UI-03 | Phase 7 | Pending |
-| UI-04 | Phase 7 | Pending |
-| UI-05 | Phase 7 | Pending |
-| UI-06 | Phase 7 | Pending |
+| UI-01 | Phase 7 | Complete |
+| UI-02 | Phase 7 | Complete |
+| UI-03 | Phase 7 | Complete |
+| UI-04 | Phase 7 | Complete |
+| UI-05 | Phase 7 | Complete |
+| UI-06 | Phase 7 | Complete |
 | ANIM-01 | Phase 8 | Pending |
 | ANIM-02 | Phase 8 | Pending |
 | ANIM-03 | Phase 8 | Pending |

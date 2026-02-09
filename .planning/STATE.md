@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-01-31)
 
 **Core value:** Combate arcade intenso em salas geradas proceduralmente - a essência do Berzerk original transportada para 3D moderno com modelos animados.
-**Current focus:** Phase 7 in progress - UI & HUD
+**Current focus:** Phase 7 complete - UI & HUD
 
 ## Current Position
 
