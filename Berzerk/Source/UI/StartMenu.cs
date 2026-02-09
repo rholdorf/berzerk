@@ -26,24 +26,24 @@ public class StartMenu
 
     public void Update(MouseState currentMouse, MouseState previousMouse, Viewport viewport)
     {
-        // Calculate button bounds (must match Draw logic)
-        string buttonText = "Start Game";
-        float buttonCenterY = viewport.Height / 2f + 20;
-        Vector2 textSize = _font.MeasureString(buttonText);
-        int buttonWidth = (int)(textSize.X + 40);
-        int buttonHeight = (int)(textSize.Y + 20);
-        int buttonX = viewport.Width / 2 - buttonWidth / 2;
-        int buttonY = (int)(buttonCenterY - buttonHeight / 2);
-        _buttonBounds = new Rectangle(buttonX, buttonY, buttonWidth, buttonHeight);
+        // Mouse coordinates are already in client area space (relative to window content)
+        Point mousePos = currentMouse.Position;
 
         // Check if mouse is hovering over button
-        _isHovering = _buttonBounds.Contains(currentMouse.Position);
+        _isHovering = _buttonBounds.Contains(mousePos);
+
+        // DEBUG: Log when hovering or clicking
+        if (_isHovering)
+        {
+            Console.WriteLine($"HOVERING - Mouse: {mousePos}, Bounds: {_buttonBounds}, Button: {previousMouse.LeftButton} -> {currentMouse.LeftButton}");
+        }
 
         // Detect click: released after being pressed while hovering
         if (_isHovering &&
             currentMouse.LeftButton == ButtonState.Released &&
             previousMouse.LeftButton == ButtonState.Pressed)
         {
+            Console.WriteLine("*** CLICK DETECTED - Firing OnStartGame event ***");
             OnStartGame?.Invoke();
         }
     }

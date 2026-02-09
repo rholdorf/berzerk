@@ -81,6 +81,9 @@ public class BerzerkGame : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;  // Show cursor for main menu
+
+        // Center window on screen to ensure proper mouse coordinates
+        Window.Position = new Point(100, 100);
     }
 
     protected override void Initialize()
@@ -232,9 +235,11 @@ public class BerzerkGame : Game
         // Wire menu events
         _startMenu.OnStartGame += () =>
         {
+            Console.WriteLine("OnStartGame EVENT FIRED - transitioning to Playing");
             _gameState = GameState.Playing;
             IsMouseVisible = false;
         };
+        Console.WriteLine("StartMenu.OnStartGame event subscribed");
 
         _pauseMenu.OnResume += () =>
         {
