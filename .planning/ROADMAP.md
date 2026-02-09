@@ -145,10 +145,12 @@ Plans:
   4. Score counter displays current points and updates when destroying robots
   5. Game over screen displays final score when player dies
   6. Simple start menu allows player to begin game
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD (to be planned in /gsd:plan-phase 7)
+- [ ] 07-01-PLAN.md — Score system, ammo counter, score counter, pickup notifications
+- [ ] 07-02-PLAN.md — Start menu and pause menu screen components
+- [ ] 07-03-PLAN.md — Full BerzerkGame integration with state machine, enhanced GameOverScreen and HealthBar
 
 ### Phase 8: Animation & Visual Polish
 **Goal**: Complete character animations and visual effects for polished experience
