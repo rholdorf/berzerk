@@ -132,7 +132,7 @@ Plans:
 - [x] 06-02-PLAN.md — RoomManager for lifecycle and transition detection
 - [x] 06-03-PLAN.md — RoomRenderer for door state visualization
 - [x] 06-04-PLAN.md — Integration into BerzerkGame with progression loop
-- [ ] 06-05-PLAN.md — Gap closure: Wire room spawn points to enemy manager
+- [x] 06-05-PLAN.md — Gap closure: Wire room spawn points to enemy manager
 
 ### Phase 7: UI & HUD
 **Goal**: Player has complete HUD showing all gameplay information
@@ -177,7 +177,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Core Combat System | 4/4 | Complete | 2026-02-02 |
 | 4. Player Health & Survival | 3/3 | Complete | 2026-02-03 |
 | 5. Enemy AI & Combat | 5/5 | Complete | 2026-02-04 |
-| 6. Room System & Progression | 4/5 | Gap closure | 2026-02-08 |
+| 6. Room System & Progression | 5/5 | Complete | 2026-02-08 |
 | 7. UI & HUD | 0/? | Not started | - |
 | 8. Animation & Visual Polish | 0/? | Not started | - |
 

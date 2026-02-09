@@ -176,12 +176,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ANIM-06 | Phase 5 | Complete |
 | ANIM-07 | Phase 5 | Complete |
 | ANIM-08 | Phase 5 | Complete |
-| ROOM-01 | Phase 6 | Pending |
-| ROOM-02 | Phase 6 | Pending |
-| ROOM-03 | Phase 6 | Pending |
-| ROOM-04 | Phase 6 | Pending |
-| ROOM-05 | Phase 6 | Pending |
-| ROOM-06 | Phase 6 | Pending |
+| ROOM-01 | Phase 6 | Complete |
+| ROOM-02 | Phase 6 | Complete |
+| ROOM-03 | Phase 6 | Complete |
+| ROOM-04 | Phase 6 | Complete |
+| ROOM-05 | Phase 6 | Complete |
+| ROOM-06 | Phase 6 | Complete |
 | UI-01 | Phase 7 | Pending |
 | UI-02 | Phase 7 | Pending |
 | UI-03 | Phase 7 | Pending |
@@ -205,4 +205,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-31*
-*Last updated: 2026-02-04 after Phase 5 completion*
+*Last updated: 2026-02-08 after Phase 6 completion*
