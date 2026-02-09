@@ -24,8 +24,18 @@ public class StartMenu
         _pixelTexture.SetData(new[] { Color.White });
     }
 
-    public void Update(MouseState currentMouse, MouseState previousMouse)
+    public void Update(MouseState currentMouse, MouseState previousMouse, Viewport viewport)
     {
+        // Calculate button bounds (must match Draw logic)
+        string buttonText = "Start Game";
+        float buttonCenterY = viewport.Height / 2f + 20;
+        Vector2 textSize = _font.MeasureString(buttonText);
+        int buttonWidth = (int)(textSize.X + 40);
+        int buttonHeight = (int)(textSize.Y + 20);
+        int buttonX = viewport.Width / 2 - buttonWidth / 2;
+        int buttonY = (int)(buttonCenterY - buttonHeight / 2);
+        _buttonBounds = new Rectangle(buttonX, buttonY, buttonWidth, buttonHeight);
+
         // Check if mouse is hovering over button
         _isHovering = _buttonBounds.Contains(currentMouse.Position);
 

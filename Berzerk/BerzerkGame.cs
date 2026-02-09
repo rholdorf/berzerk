@@ -286,7 +286,7 @@ public class BerzerkGame : Game
         {
             case GameState.MainMenu:
                 MouseState menuMouse = Mouse.GetState();
-                _startMenu.Update(menuMouse, _previousMouseState);
+                _startMenu.Update(menuMouse, _previousMouseState, GraphicsDevice.Viewport);
                 _previousMouseState = menuMouse;
                 break;
 
