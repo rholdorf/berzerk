@@ -39,7 +39,6 @@ public class StartMenu
         _timeElapsed += deltaTime;
         if (_timeElapsed >= 3f)
         {
-            Console.WriteLine("Auto-starting game (macOS input workaround)");
             OnStartGame?.Invoke();
             _hasStarted = true;
             return;

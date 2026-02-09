@@ -279,7 +279,7 @@ public class BerzerkGame : Game
         Console.WriteLine("R: Respawn targets / Restart (game over)");
         Console.WriteLine("G: Spawn new enemy wave");
         Console.WriteLine("1/2/3: Switch animations");
-        Console.WriteLine("Escape: Exit");
+        Console.WriteLine("Escape: Pause");
         Console.WriteLine("================\n");
     }
 
