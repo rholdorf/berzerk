@@ -17,7 +17,9 @@ namespace Berzerk;
 
 public enum GameState
 {
+    MainMenu,
     Playing,
+    Paused,
     Dying,
     GameOver
 }
@@ -38,6 +40,7 @@ public class BerzerkGame : Game
     private AmmoSystem _ammoSystem;
     private WeaponSystem _weaponSystem;
     private TargetManager _targetManager;
+    private ScoreSystem _scoreSystem;
 
     // Health and survival
     private HealthSystem _healthSystem;
@@ -45,7 +48,17 @@ public class BerzerkGame : Game
     private ScreenFade _screenFade;
     private HealthBar _healthBar;
     private GameOverScreen _gameOverScreen;
-    private GameState _gameState = GameState.Playing;
+    private GameState _gameState = GameState.MainMenu;
+
+    // HUD elements
+    private AmmoCounter _ammoCounter;
+    private ScoreCounter _scoreCounter;
+    private PickupNotification _pickupNotification;
+
+    // Menu screens
+    private StartMenu _startMenu;
+    private PauseMenu _pauseMenu;
+    private MouseState _previousMouseState;
 
     // Enemy system
     private EnemyManager _enemyManager;
@@ -67,7 +80,7 @@ public class BerzerkGame : Game
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible = false;  // Hide OS cursor (we draw our own crosshair)
+        IsMouseVisible = true;  // Show cursor for main menu
     }
 
     protected override void Initialize()
@@ -89,10 +102,10 @@ public class BerzerkGame : Game
         _weaponSystem = new WeaponSystem(_ammoSystem, _projectileManager);
         _targetManager = new TargetManager();
         _targetManager.Initialize();
+        _scoreSystem = new ScoreSystem();
 
         // Initialize health system
         _healthSystem = new HealthSystem();
-        _healthSystem.OnDamageTaken += () => _damageVignette.Trigger();
         _healthSystem.OnDeath += () =>
         {
             _gameState = GameState.Dying;
@@ -199,6 +212,57 @@ public class BerzerkGame : Game
         _gameOverScreen = new GameOverScreen();
         _gameOverScreen.LoadContent(Content, GraphicsDevice);
 
+        // Load HUD elements
+        _ammoCounter = new AmmoCounter();
+        _ammoCounter.LoadContent(Content);
+
+        _scoreCounter = new ScoreCounter();
+        _scoreCounter.LoadContent(Content);
+
+        _pickupNotification = new PickupNotification();
+        _pickupNotification.LoadContent(Content);
+
+        // Load menu screens
+        _startMenu = new StartMenu();
+        _startMenu.LoadContent(Content, GraphicsDevice);
+
+        _pauseMenu = new PauseMenu();
+        _pauseMenu.LoadContent(Content, GraphicsDevice);
+
+        // Wire menu events
+        _startMenu.OnStartGame += () =>
+        {
+            _gameState = GameState.Playing;
+            IsMouseVisible = false;
+        };
+
+        _pauseMenu.OnResume += () =>
+        {
+            _gameState = GameState.Playing;
+            _playerController.IsEnabled = true;
+            IsMouseVisible = false;
+        };
+
+        _pauseMenu.OnQuit += Exit;
+
+        _gameOverScreen.OnRestart += () =>
+        {
+            RestartGame();
+            IsMouseVisible = false;
+        };
+
+        _gameOverScreen.OnQuit += Exit;
+
+        // Wire score tracking to enemy kills
+        _enemyManager.OnEnemyKilled += _scoreSystem.AddEnemyKill;
+
+        // Wire health bar flash to damage
+        _healthSystem.OnDamageTaken += () =>
+        {
+            _damageVignette.Trigger();
+            _healthBar.Trigger();
+        };
+
         Console.WriteLine("\n=== Controls ===");
         Console.WriteLine("WASD/QE: Move player (tank controls)");
         Console.WriteLine("Mouse: Aim (crosshair)");
@@ -220,14 +284,40 @@ public class BerzerkGame : Game
 
         switch (_gameState)
         {
+            case GameState.MainMenu:
+                MouseState menuMouse = Mouse.GetState();
+                _startMenu.Update(menuMouse, _previousMouseState);
+                _previousMouseState = menuMouse;
+                break;
+
             case GameState.Playing:
+                // Check ESC for pause BEFORE processing gameplay
+                if (_inputManager.IsKeyPressed(Keys.Escape))
+                {
+                    _gameState = GameState.Paused;
+                    _playerController.IsEnabled = false;
+                    IsMouseVisible = true;
+                    break;
+                }
                 UpdatePlaying(gameTime, deltaTime);
                 break;
+
+            case GameState.Paused:
+                // No ESC to unpause - only Resume button unpauses (per user decision)
+                MouseState pauseMouse = Mouse.GetState();
+                _pauseMenu.Update(pauseMouse, _previousMouseState);
+                _previousMouseState = pauseMouse;
+                break;
+
             case GameState.Dying:
                 UpdateDying(deltaTime);
                 break;
+
             case GameState.GameOver:
-                UpdateGameOver();
+                IsMouseVisible = true;
+                MouseState goMouse = Mouse.GetState();
+                _gameOverScreen.Update(goMouse, _previousMouseState);
+                _previousMouseState = goMouse;
                 break;
         }
 
@@ -256,7 +346,17 @@ public class BerzerkGame : Game
         _projectileManager.Update(deltaTime);
         _targetManager.Update(deltaTime);
         _targetManager.CheckProjectileCollisions(_projectileManager.GetActiveProjectiles());
+
+        // Check pickup collection with before/after comparison for notifications
+        int ammoBefore = _ammoSystem.TotalAmmo;
+        int healthBefore = _healthSystem.CurrentHealth;
         _targetManager.CheckPickupCollection(_playerController.Transform.Position, _ammoSystem, _healthSystem);
+        int ammoGained = _ammoSystem.TotalAmmo - ammoBefore;
+        if (ammoGained > 0)
+            _pickupNotification.Show($"+{ammoGained} Ammo", GraphicsDevice.Viewport);
+        int healthGained = _healthSystem.CurrentHealth - healthBefore;
+        if (healthGained > 0)
+            _pickupNotification.Show($"+{healthGained} Health", GraphicsDevice.Viewport);
 
         // Update enemy system
         _enemyManager.Update(gameTime, _playerController.Transform.Position);
@@ -322,10 +422,9 @@ public class BerzerkGame : Game
         // Update animations and effects
         _currentModel?.Update(gameTime);
         _damageVignette.Update(deltaTime);
-
-        // Exit handling
-        if (_inputManager.IsKeyPressed(Keys.Escape))
-            Exit();
+        _healthBar.Update(deltaTime);
+        _pickupNotification.Update(deltaTime);
+        _ammoCounter.Update(deltaTime);
     }
 
     private void UpdateDying(float deltaTime)
@@ -342,19 +441,15 @@ public class BerzerkGame : Game
 
     private void UpdateGameOver()
     {
-        if (_inputManager.IsKeyPressed(Keys.R))
-        {
-            RestartGame();
-        }
-
-        if (_inputManager.IsKeyPressed(Keys.Escape))
-            Exit();
+        // Game over screen now handled by Update switch case (mouse interaction)
+        // No keyboard shortcuts - use buttons only
     }
 
     private void RestartGame()
     {
         _healthSystem.Reset();
         _screenFade.Reset();
+        _scoreSystem.Reset();
         _playerController.IsEnabled = true;
         _playerController.Transform.Position = Vector3.Zero;  // Reset position
         _gameState = GameState.Playing;
@@ -467,23 +562,34 @@ public class BerzerkGame : Game
         // Draw 2D UI
         _spriteBatch.Begin();
 
-        // Always draw crosshair during gameplay
-        if (_gameState == GameState.Playing)
+        if (_gameState == GameState.MainMenu)
         {
+            _startMenu.Draw(_spriteBatch, GraphicsDevice.Viewport);
+        }
+        else if (_gameState == GameState.Playing || _gameState == GameState.Paused)
+        {
+            // HUD elements (visible during gameplay and when paused)
             _crosshair.Draw(_spriteBatch, GraphicsDevice.Viewport);
             _healthBar.Draw(_spriteBatch, _healthSystem.CurrentHealth, _healthSystem.MaxHealth);
+            _ammoCounter.Draw(_spriteBatch, _ammoSystem.CurrentMagazine, _ammoSystem.ReserveAmmo, GraphicsDevice.Viewport);
+            _scoreCounter.Draw(_spriteBatch, _scoreSystem.CurrentScore, GraphicsDevice.Viewport);
+            _pickupNotification.Draw(_spriteBatch);
+
+            // Pause overlay on top of HUD
+            if (_gameState == GameState.Paused)
+            {
+                _pauseMenu.Draw(_spriteBatch, GraphicsDevice.Viewport);
+            }
         }
 
-        // Draw damage vignette (always, handles own alpha)
+        // Effects (always, they handle own alpha)
         _damageVignette.Draw(_spriteBatch, GraphicsDevice.Viewport);
-
-        // Draw screen fade (always, handles own alpha)
         _screenFade.Draw(_spriteBatch, GraphicsDevice.Viewport);
 
-        // Draw game over screen when in GameOver state
+        // Game over screen (on top of everything)
         if (_gameState == GameState.GameOver)
         {
-            _gameOverScreen.Draw(_spriteBatch, GraphicsDevice.Viewport);
+            _gameOverScreen.Draw(_spriteBatch, GraphicsDevice.Viewport, _scoreSystem.CurrentScore);
         }
 
         _spriteBatch.End();
