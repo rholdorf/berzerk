@@ -29,11 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. AnimationClip and Keyframe data structures exist and can represent a full animation timeline with per-bone transforms
   3. ContentTypeWriter serializes SkinningData to binary at build time without errors
   4. ContentTypeReader deserializes SkinningData at runtime and produces identical data to what was written
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Create SkinningData types and ContentTypeWriter/Reader serialization pair
+- [ ] 01-02-PLAN.md — Round-trip serialization tests proving writer/reader binary format correctness
 
 ### Phase 2: Content Pipeline Processor
 **Goal**: The Content Pipeline produces correct XNB files from Mixamo FBX with all skeleton, skinning, and animation data intact
@@ -102,7 +102,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. SkinningData Types | 0/TBD | Not started | - |
+| 1. SkinningData Types | 0/2 | Planned | - |
 | 2. Content Pipeline Processor | 0/TBD | Not started | - |
 | 3. Animation Runtime | 0/TBD | Not started | - |
 | 4. Rendering and Game Integration | 0/TBD | Not started | - |
