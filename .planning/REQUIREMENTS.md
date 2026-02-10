@@ -73,14 +73,14 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Custom animation editor | Use Mixamo + Blender instead — building editor is massive scope |
-| Custom skeleton format | Fix FBX pipeline, don't replace it — FBX is industry standard |
-| Morph targets / facial animation | Out of scope — Mixamo characters lack blend shapes, not needed for action/adventure gameplay |
-| IK (inverse kinematics) | Overkill for flat-ground arcade game — not needed for current gameplay |
-| Ragdoll physics | Not needed for current game design — enemies don't need physics-based death |
-| Procedural animation | Not needed — Mixamo library covers all required animations |
-| Runtime FBX loading | Content Pipeline approach is correct — compile-time processing is faster |
-| Multiple Mixamo characters | Defer to v2+ — focus on single character pipeline first |
+| Custom animation editor | Use Mixamo + Blender instead -- building editor is massive scope |
+| Custom skeleton format | Fix FBX pipeline, don't replace it -- FBX is industry standard |
+| Morph targets / facial animation | Out of scope -- Mixamo characters lack blend shapes, not needed for action/adventure gameplay |
+| IK (inverse kinematics) | Overkill for flat-ground arcade game -- not needed for current gameplay |
+| Ragdoll physics | Not needed for current game design -- enemies don't need physics-based death |
+| Procedural animation | Not needed -- Mixamo library covers all required animations |
+| Runtime FBX loading | Content Pipeline approach is correct -- compile-time processing is faster |
+| Multiple Mixamo characters | Defer to v2+ -- focus on single character pipeline first |
 | Weapon attachment bones | Defer until bone count confirmed within 72-bone limit |
 
 ## Traceability
@@ -89,13 +89,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| | | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| PIPE-01 | Phase 2 | Pending |
+| PIPE-02 | Phase 2 | Pending |
+| PIPE-03 | Phase 2 | Pending |
+| PIPE-04 | Phase 2 | Pending |
+| PIPE-05 | Phase 2 | Pending |
+| PIPE-06 | Phase 2 | Pending |
+| ANIM-01 | Phase 3 | Pending |
+| ANIM-02 | Phase 3 | Pending |
+| ANIM-03 | Phase 3 | Pending |
+| ANIM-04 | Phase 3 | Pending |
+| ANIM-05 | Phase 3 | Pending |
+| ANIM-06 | Phase 3 | Pending |
+| ANIM-07 | Phase 3 | Pending |
+| REND-01 | Phase 4 | Pending |
+| REND-02 | Phase 4 | Pending |
+| REND-03 | Phase 4 | Pending |
+| REND-04 | Phase 4 | Pending |
+| GAME-01 | Phase 4 | Pending |
+| GAME-02 | Phase 4 | Pending |
+| GAME-03 | Phase 5 | Pending |
+| PLSH-01 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 24 total
-- Mapped to phases: 0
-- Unmapped: 24 ⚠️
+- v1 requirements: 25 total
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-09*
-*Last updated: 2026-02-09 after initial definition*
+*Last updated: 2026-02-09 after roadmap creation*
