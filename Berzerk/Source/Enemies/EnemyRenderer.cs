@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -25,6 +26,7 @@ public class EnemyRenderer
     private const float HEALTH_PICKUP_RADIUS = 0.3f; // Per plan specification
 
     // Shared robot animation models (loaded once, reused by all enemies)
+    // Each model has test-character.fbx mesh + one specific animation
     private AnimatedModel? _idleModel;
     private AnimatedModel? _walkModel;
     private AnimatedModel? _attackModel;
@@ -47,21 +49,33 @@ public class EnemyRenderer
 
     /// <summary>
     /// Load shared robot animation models (idle, walk, attack).
-    /// User confirmed: idle.fbx, walk.fbx, bash.fbx (skeleton-only animations without skin).
+    /// Loads test-character.fbx as base mesh and merges animations from separate files.
     /// These are shared across all enemies to minimize memory usage.
     /// </summary>
     public void LoadRobotModels(ContentManager content)
     {
+        // Load idle model: base character + idle animation
         _idleModel = new AnimatedModel();
-        _idleModel.LoadContent(content, "Models/idle");
+        _idleModel.LoadContent(content, "Models/test-character");
+        _idleModel.AddAnimationsFrom(content, "Models/idle", "idle");
+        _idleModel.PlayAnimation("idle");
+        Console.WriteLine("EnemyRenderer: Loaded idle model with 'idle' animation");
 
+        // Load walk model: base character + walk animation
         _walkModel = new AnimatedModel();
-        _walkModel.LoadContent(content, "Models/walk");
+        _walkModel.LoadContent(content, "Models/test-character");
+        _walkModel.AddAnimationsFrom(content, "Models/walk", "walk");
+        _walkModel.PlayAnimation("walk");
+        Console.WriteLine("EnemyRenderer: Loaded walk model with 'walk' animation");
 
+        // Load attack model: base character + bash animation
         _attackModel = new AnimatedModel();
-        _attackModel.LoadContent(content, "Models/bash");
+        _attackModel.LoadContent(content, "Models/test-character");
+        _attackModel.AddAnimationsFrom(content, "Models/bash", "bash");
+        _attackModel.PlayAnimation("bash");
+        Console.WriteLine("EnemyRenderer: Loaded attack model with 'bash' animation");
 
-        Console.WriteLine("EnemyRenderer: Loaded shared robot animation models (idle, walk, bash)");
+        Console.WriteLine("EnemyRenderer: Loaded shared robot models with animations");
     }
 
     /// <summary>

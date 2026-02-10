@@ -20,6 +20,7 @@ public class AnimatedModel
 
     private string? _currentClipName;
     private TimeSpan _currentTime = TimeSpan.Zero;
+    private int _debugFrameCount = 0;
 
     /// <summary>
     /// Loads a model and its animation data from content.
@@ -86,22 +87,53 @@ public class AnimatedModel
         if (_model == null)
             return;
 
-        // Enable backface culling to prevent inside-out rendering
+        // Enable backface culling and depth testing
         RasterizerState rasterizerState = new RasterizerState
         {
             CullMode = CullMode.CullCounterClockwiseFace
         };
         graphicsDevice.RasterizerState = rasterizerState;
 
+        // Ensure depth testing is enabled for proper occlusion
+        graphicsDevice.DepthStencilState = DepthStencilState.Default;
+
+        // Render spheres first, then other meshes (for proper depth sorting)
+        // This ensures armor pieces occlude the joint spheres correctly
+        var sphereMeshes = new List<ModelMesh>();
+        var otherMeshes = new List<ModelMesh>();
+
         foreach (var mesh in _model.Meshes)
         {
-            // Skip debug geometry (spheres at joints)
             string meshName = mesh.Name.ToLower();
-            if (meshName.Contains("sphere") || meshName.Contains("joint") || meshName.Contains("debug"))
+            if (meshName.Contains("sphere") || meshName.Contains("joint"))
             {
-                continue;
+                sphereMeshes.Add(mesh);
+            }
+            else
+            {
+                otherMeshes.Add(mesh);
+            }
+        }
+
+        // Draw spheres first
+        foreach (var mesh in sphereMeshes)
+        {
+            foreach (BasicEffect effect in mesh.Effects)
+            {
+                effect.World = _boneTransforms[mesh.ParentBone.Index] * world;
+                effect.View = view;
+                effect.Projection = projection;
+
+                effect.EnableDefaultLighting();
+                effect.PreferPerPixelLighting = true;
             }
 
+            mesh.Draw();
+        }
+
+        // Draw other meshes on top (will occlude spheres where appropriate)
+        foreach (var mesh in otherMeshes)
+        {
             foreach (BasicEffect effect in mesh.Effects)
             {
                 effect.World = _boneTransforms[mesh.ParentBone.Index] * world;
@@ -136,7 +168,7 @@ public class AnimatedModel
 
         _currentClipName = clipName;
         _currentTime = TimeSpan.Zero;
-        Console.WriteLine($"AnimatedModel: Playing animation '{clipName}'");
+        Console.WriteLine($"AnimatedModel: Playing animation '{clipName}' with {clip.Keyframes.Count} bone tracks");
     }
 
     /// <summary>
@@ -148,6 +180,56 @@ public class AnimatedModel
             return new List<string>();
 
         return _animationData.Clips.Keys.ToList();
+    }
+
+    /// <summary>
+    /// Merges animation data from another model into this one.
+    /// Used to combine a base character model with separate animation files.
+    /// </summary>
+    /// <param name="content">ContentManager to load from</param>
+    /// <param name="animationPath">Path to animation-only model</param>
+    /// <param name="animationName">Optional custom name for the animation (uses original name if null)</param>
+    public void AddAnimationsFrom(ContentManager content, string animationPath, string? animationName = null)
+    {
+        if (_animationData == null)
+        {
+            _animationData = new AnimationData();
+        }
+
+        // Load the animation-only model
+        var animModel = content.Load<Model>(animationPath);
+        var animData = animModel.Tag as AnimationData;
+
+        if (animData == null)
+        {
+            Console.WriteLine($"AnimatedModel: No animation data found in '{animationPath}'");
+            return;
+        }
+
+        // Merge animations from the loaded model into our animation data
+        foreach (var clip in animData.Clips)
+        {
+            // Use custom name if provided, otherwise use original name
+            string targetName = animationName ?? clip.Key;
+
+            if (_animationData.Clips.ContainsKey(targetName))
+            {
+                Console.WriteLine($"AnimatedModel: Warning - animation '{targetName}' already exists, skipping");
+                continue;
+            }
+
+            _animationData.Clips[targetName] = clip.Value;
+            Console.WriteLine($"AnimatedModel: Added animation '{targetName}' from '{animationPath}' (duration: {clip.Value.Duration.TotalSeconds:F2}s)");
+        }
+
+        // Merge bone indices (should be compatible if from same skeleton)
+        foreach (var bone in animData.BoneIndices)
+        {
+            if (!_animationData.BoneIndices.ContainsKey(bone.Key))
+            {
+                _animationData.BoneIndices[bone.Key] = bone.Value;
+            }
+        }
     }
 
     /// <summary>
@@ -164,6 +246,12 @@ public class AnimatedModel
         for (int i = 0; i < _model.Bones.Count; i++)
         {
             localTransforms[i] = _model.Bones[i].Transform;
+        }
+
+        // Debug: Log bone count once per second
+        if (_debugFrameCount++ % 60 == 0 && clip.Keyframes.Count == 0)
+        {
+            Console.WriteLine($"AnimatedModel: WARNING - Clip '{clip.Name}' has NO keyframes!");
         }
 
         // Override with animated transforms from keyframes

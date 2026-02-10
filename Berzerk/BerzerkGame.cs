@@ -12,6 +12,7 @@ using Berzerk.Source.Enemies;
 using Berzerk.Source.Rooms;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Berzerk;
 
@@ -68,12 +69,8 @@ public class BerzerkGame : Game
     private RoomRenderer _roomRenderer;
     private int _roomsCleared = 0;
 
-    // Test animated model and animations
-    private AnimatedModel _testCharacter;
-    private AnimatedModel _idleAnimation;
-    private AnimatedModel _walkAnimation;
-    private AnimatedModel _runAnimation;
-    private AnimatedModel _currentModel;
+    // Player character model with merged animations
+    private AnimatedModel _playerModel;
 
     public BerzerkGame()
     {
@@ -142,25 +139,27 @@ public class BerzerkGame : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // Load test character and separate animation files
-        _testCharacter = new AnimatedModel();
-        _testCharacter.LoadContent(Content, "Models/test-character");
+        // Load player character model with mesh geometry
+        _playerModel = new AnimatedModel();
+        _playerModel.LoadContent(Content, "Models/test-character");
 
-        _idleAnimation = new AnimatedModel();
-        _idleAnimation.LoadContent(Content, "Models/idle");
-
-        _walkAnimation = new AnimatedModel();
-        _walkAnimation.LoadContent(Content, "Models/walk");
-
-        _runAnimation = new AnimatedModel();
-        _runAnimation.LoadContent(Content, "Models/run");
+        // Merge animations from separate animation files with custom names
+        _playerModel.AddAnimationsFrom(Content, "Models/idle", "idle");
+        _playerModel.AddAnimationsFrom(Content, "Models/walk", "walk");
+        _playerModel.AddAnimationsFrom(Content, "Models/run", "run");
+        _playerModel.AddAnimationsFrom(Content, "Models/bash", "bash");
 
         // Start with idle animation
-        _currentModel = _idleAnimation;
-        var animNames = _currentModel.GetAnimationNames();
-        if (animNames.Count > 0)
+        var animNames = _playerModel.GetAnimationNames();
+        if (animNames.Contains("idle"))
         {
-            _currentModel.PlayAnimation(animNames[0]);
+            _playerModel.PlayAnimation("idle");
+            Console.WriteLine($"Player model loaded with {animNames.Count} animations: {string.Join(", ", animNames)}");
+        }
+        else if (animNames.Count > 0)
+        {
+            _playerModel.PlayAnimation(animNames[0]);
+            Console.WriteLine($"Player model loaded with {animNames.Count} animations: {string.Join(", ", animNames)}");
         }
 
         // Initialize camera and debug renderer
@@ -390,37 +389,22 @@ public class BerzerkGame : Game
         // Animation switching using keyboard input
         if (_inputManager.IsKeyPressed(Keys.D1))
         {
-            _currentModel = _idleAnimation;
-            var animNames = _currentModel.GetAnimationNames();
-            if (animNames.Count > 0)
-            {
-                _currentModel.PlayAnimation(animNames[0]);
-                Console.WriteLine("Switched to idle animation");
-            }
+            _playerModel.PlayAnimation("idle");
+            Console.WriteLine("Switched to idle animation");
         }
         else if (_inputManager.IsKeyPressed(Keys.D2))
         {
-            _currentModel = _walkAnimation;
-            var animNames = _currentModel.GetAnimationNames();
-            if (animNames.Count > 0)
-            {
-                _currentModel.PlayAnimation(animNames[0]);
-                Console.WriteLine("Switched to walk animation");
-            }
+            _playerModel.PlayAnimation("walk");
+            Console.WriteLine("Switched to walk animation");
         }
         else if (_inputManager.IsKeyPressed(Keys.D3))
         {
-            _currentModel = _runAnimation;
-            var animNames = _currentModel.GetAnimationNames();
-            if (animNames.Count > 0)
-            {
-                _currentModel.PlayAnimation(animNames[0]);
-                Console.WriteLine("Switched to run animation");
-            }
+            _playerModel.PlayAnimation("run");
+            Console.WriteLine("Switched to run animation");
         }
 
         // Update animations and effects
-        _currentModel?.Update(gameTime);
+        _playerModel.Update(gameTime);
         _damageVignette.Update(deltaTime);
         _healthBar.Update(deltaTime);
         _pickupNotification.Update(deltaTime);
@@ -544,14 +528,14 @@ public class BerzerkGame : Game
             _enemyRenderer.DrawExplosions(_enemyManager.GetActiveExplosions(), _camera.ViewMatrix, _camera.ProjectionMatrix);
             _enemyRenderer.DrawHealthPickups(_targetManager.GetHealthPickups(), _camera.ViewMatrix, _camera.ProjectionMatrix);
 
-            // Draw 3D content with camera matrices
+            // Draw player character with camera matrices
             // Scale down model by 0.01x - Mixamo models are typically 100x too large
             // Mixamo models face +Z, but we want them to face -Z (forward in MonoGame)
             Matrix modelScale = Matrix.CreateScale(0.01f);
             Matrix modelRotationCorrection = Matrix.CreateRotationY(MathHelper.Pi); // 180 degree turn
             Matrix worldMatrix = modelScale * modelRotationCorrection * _playerController.Transform.WorldMatrix;
 
-            _currentModel?.Draw(
+            _playerModel.Draw(
                 GraphicsDevice,
                 worldMatrix,
                 _camera.ViewMatrix,
