@@ -75,11 +75,11 @@ Plans:
   2. The character visually deforms according to the playing animation -- no T-pose, no exploded mesh, no distortion
   3. AnimatedModel class exposes a clean API (PlayAnimation, Update, Draw) that game code can call
   4. EnemyRenderer shares a single Model instance across animation clips instead of loading duplicate models
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Switch AnimatedModel Draw from BasicEffect to SkinnedEffect with SetBoneTransforms
+- [ ] 04-02-PLAN.md — Refactor EnemyRenderer to share one model with merged clips, per-enemy AnimatedModel
 
 ### Phase 5: Verification and Polish
 **Goal**: All four Mixamo animations play correctly on the character and transitions between them are smooth
@@ -104,5 +104,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. SkinningData Types | 2/2 | Complete | 2026-02-10 |
 | 2. Content Pipeline Processor | 1/1 | Complete | 2026-02-11 |
 | 3. Animation Runtime | 2/2 | Complete | 2026-02-11 |
-| 4. Rendering and Game Integration | 0/TBD | Not started | - |
+| 4. Rendering and Game Integration | 0/2 | Not started | - |
 | 5. Verification and Polish | 0/TBD | Not started | - |
