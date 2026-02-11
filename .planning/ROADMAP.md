@@ -13,7 +13,7 @@ Fix the T-pose problem by building a correct skeletal animation pipeline from Mi
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: SkinningData Types and Serialization** - Define data structures and Content Pipeline serialization for skeletal animation
-- [ ] **Phase 2: Content Pipeline Processor** - Build-time FBX processing that extracts skeleton, skinning data, and animation keyframes
+- [x] **Phase 2: Content Pipeline Processor** - Build-time FBX processing that extracts skeleton, skinning data, and animation keyframes
 - [ ] **Phase 3: Animation Runtime** - Three-stage transform pipeline that computes skinning matrices from keyframes
 - [ ] **Phase 4: Rendering and Game Integration** - Connect animation math to SkinnedEffect rendering and refactor game code
 - [ ] **Phase 5: Verification and Polish** - Verify all animations play correctly and add crossfade transitions
@@ -48,7 +48,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — Rewrite MixamoModelProcessor to produce SkinningData and delete old pipeline types
+- [x] 02-01-PLAN.md — Rewrite MixamoModelProcessor to produce SkinningData and delete old pipeline types
 
 ### Phase 3: Animation Runtime
 **Goal**: The runtime can read animation data and compute correct skinning matrices each frame via the three-stage transform pipeline
@@ -101,8 +101,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. SkinningData Types | 0/2 | Planned | - |
-| 2. Content Pipeline Processor | 0/TBD | Not started | - |
+| 1. SkinningData Types | 2/2 | Complete | 2026-02-10 |
+| 2. Content Pipeline Processor | 1/1 | Complete | 2026-02-11 |
 | 3. Animation Runtime | 0/TBD | Not started | - |
 | 4. Rendering and Game Integration | 0/TBD | Not started | - |
 | 5. Verification and Polish | 0/TBD | Not started | - |
