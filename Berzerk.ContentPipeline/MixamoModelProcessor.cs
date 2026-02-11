@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
@@ -7,303 +10,330 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 namespace Berzerk.ContentPipeline;
 
 /// <summary>
-/// Custom content processor for Mixamo FBX models that adds verbose logging
-/// and validates skeleton structure during import.
+/// Custom content processor for Mixamo FBX models that produces SkinningData
+/// following the canonical XNA SkinnedModelProcessor pattern.
+///
+/// The processor:
+/// 1. Finds the skeleton via MeshHelper.FindSkeleton
+/// 2. Flattens non-bone transforms into geometry
+/// 3. Flattens the skeleton to establish canonical bone ordering
+/// 4. Extracts bind pose, inverse bind pose, and skeleton hierarchy
+/// 5. Extracts animation keyframes with correct bone indices
+/// 6. Calls base.Process() for mesh compilation
+/// 7. Attaches SkinningData to Model.Tag
+///
+/// For animation-only FBX files (no skeleton), animations are extracted
+/// with incrementally assigned bone indices and empty skeleton arrays.
 /// </summary>
 [ContentProcessor(DisplayName = "Mixamo Model Processor")]
 public class MixamoModelProcessor : ModelProcessor
 {
     /// <summary>
-    /// Processes a Mixamo FBX model with verbose logging and validation.
+    /// Forces SkinnedEffect for all materials processed by this processor.
+    /// This is the canonical workaround from the XNA SkinnedModel sample.
+    /// If this does not work in practice (MonoGame Issue #3057), the fallback
+    /// is to override ConvertMaterial() to return SkinnedMaterialContent.
+    /// </summary>
+    [DefaultValue(MaterialProcessorDefaultEffect.SkinnedEffect)]
+    public override MaterialProcessorDefaultEffect DefaultEffect
+    {
+        get => MaterialProcessorDefaultEffect.SkinnedEffect;
+        set { }
+    }
+
+    /// <summary>
+    /// Processes a Mixamo FBX model, producing SkinningData with canonical bone ordering.
     /// </summary>
     public override ModelContent Process(NodeContent input, ContentProcessorContext context)
     {
         context.Logger.LogImportantMessage("=== Processing Mixamo model: {0} ===", input.Name);
 
-        // Validate skeleton structure
+        // Step 1: Find skeleton
         BoneContent? skeleton = MeshHelper.FindSkeleton(input);
 
+        // Step 2: Handle skeleton == null (animation-only or static model)
         if (skeleton == null)
         {
             context.Logger.LogWarning(null, null,
-                "No skeleton found in model '{0}'. This may be a static model, or FBX import failed to detect bones.",
-                input.Name);
-        }
-        else
-        {
-            int boneCount = CountBones(skeleton);
-            context.Logger.LogImportantMessage("Found skeleton: '{0}' with {1} bones", skeleton.Name, boneCount);
-
-            // Log bone hierarchy for debugging
-            context.Logger.LogMessage("Bone hierarchy:");
-            LogBoneHierarchy(skeleton, 0, context);
+                "No skeleton found in '{0}'. Processing as animation-only/static model.", input.Name);
+            return ProcessWithoutSkeleton(input, context);
         }
 
-        // Check for animations
-        var animations = ExtractAnimations(input, context);
-        if (animations.Count > 0)
-        {
-            context.Logger.LogImportantMessage("Found {0} animation(s):", animations.Count);
-            foreach (var anim in animations)
-            {
-                context.Logger.LogMessage("  - '{0}' (duration: {1:F2}s)", anim.Key, anim.Value.TotalSeconds);
-            }
-        }
-        else
-        {
-            context.Logger.LogMessage("No animations found (expected for static models)");
-        }
+        // Step 3: Flatten non-bone transforms into geometry
+        FlattenTransforms(input, skeleton);
 
-        // Call base ModelProcessor for standard processing
-        context.Logger.LogMessage("Starting standard ModelProcessor...");
-        ModelContent model;
+        // Step 4: Flatten skeleton -- canonical bone ordering
+        IList<BoneContent> bones = MeshHelper.FlattenSkeleton(skeleton);
+        context.Logger.LogImportantMessage("Skeleton: {0} bones (max {1})", bones.Count, 72);
 
-        try
+        // Validate bone count
+        if (bones.Count > 72)
         {
-            model = base.Process(input, context);
-            context.Logger.LogImportantMessage("Standard ModelProcessor completed successfully");
-        }
-        catch (Exception ex)
-        {
-            // Log detailed error and rethrow
-            context.Logger.LogMessage("ModelProcessor failed with error: {0}", ex.Message);
             throw new InvalidContentException(
-                $"Failed to process Mixamo model '{input.Name}'. This may indicate FBX compatibility issues. " +
-                $"Error: {ex.Message}", ex);
+                $"Model '{input.Name}' skeleton has {bones.Count} bones, exceeding SkinnedEffect.MaxBones (72). " +
+                "Reduce bone count in the model or use a custom shader that supports more bones.");
         }
 
-        // Extract and attach animation data to Model.Tag
-        if (animations.Count > 0)
+        // Log bone names for debugging
+        for (int i = 0; i < bones.Count; i++)
         {
-            var animationData = BuildAnimationData(input, skeleton, animations, context);
-            model.Tag = animationData;
-            context.Logger.LogMessage("Animation data attached to Model.Tag ({0} clips)", animationData.Clips.Count);
+            context.Logger.LogMessage("  Bone[{0}]: {1}", i, bones[i].Name);
         }
 
-        context.Logger.LogImportantMessage("=== Mixamo model processing complete ===");
+        // Step 5: Extract bind pose (bone.Transform for each bone in flattened list)
+        var bindPose = new List<Matrix>();
+        // Step 6: Extract inverse bind pose (Matrix.Invert(bone.AbsoluteTransform))
+        var inverseBindPose = new List<Matrix>();
+        // Step 7: Extract skeleton hierarchy (parent indices)
+        var skeletonHierarchy = new List<int>();
+
+        foreach (BoneContent bone in bones)
+        {
+            bindPose.Add(bone.Transform);
+            inverseBindPose.Add(Matrix.Invert(bone.AbsoluteTransform));
+            // bones.IndexOf(bone.Parent as BoneContent):
+            // Root bone's parent is NodeContent (not BoneContent), so cast returns null,
+            // and IndexOf(null) returns -1 -- which is the correct sentinel for "no parent".
+            skeletonHierarchy.Add(bones.IndexOf((bone.Parent as BoneContent)!));
+        }
+
+        // Step 8: Extract animations
+        var animationClips = ProcessAnimations(skeleton, bones, input, context);
+        context.Logger.LogImportantMessage("Extracted {0} animation clip(s)", animationClips.Count);
+
+        // Step 9: Standard ModelProcessor handles mesh compilation, vertex channels, materials
+        ModelContent model = base.Process(input, context);
+
+        // Step 10: Attach SkinningData to Model.Tag
+        model.Tag = new SkinningData(animationClips, bindPose, inverseBindPose, skeletonHierarchy);
+        context.Logger.LogImportantMessage(
+            "Attached SkinningData: {0} bones, {1} clips", bones.Count, animationClips.Count);
+
+        context.Logger.LogImportantMessage("=== Mixamo model processing complete: {0} ===", input.Name);
         return model;
     }
 
     /// <summary>
-    /// Recursively counts all bones in the skeleton hierarchy.
+    /// Bakes non-bone node transforms into geometry. Recurses through the node tree,
+    /// skipping the skeleton (whose transforms are bone rest poses and must not be flattened).
+    /// Source: XNA SkinningSample_4_0.
     /// </summary>
-    private int CountBones(BoneContent bone)
+    private static void FlattenTransforms(NodeContent node, BoneContent skeleton)
     {
-        int count = 1;
-        foreach (BoneContent child in bone.Children.OfType<BoneContent>())
+        foreach (NodeContent child in node.Children)
         {
-            count += CountBones(child);
-        }
-        return count;
-    }
+            // Do NOT flatten the skeleton itself -- it stores bone rest transforms
+            if (child == skeleton)
+                continue;
 
-    /// <summary>
-    /// Logs the bone hierarchy structure for debugging.
-    /// </summary>
-    private void LogBoneHierarchy(BoneContent bone, int depth, ContentProcessorContext context)
-    {
-        string indent = new string(' ', depth * 2);
-        context.Logger.LogMessage("{0}> {1}", indent, bone.Name);
+            // Bake this node's transform into its geometry
+            MeshHelper.TransformScene(child, child.Transform);
 
-        foreach (BoneContent child in bone.Children.OfType<BoneContent>())
-        {
-            LogBoneHierarchy(child, depth + 1, context);
+            // Reset the node's transform to identity (it's now in the geometry)
+            child.Transform = Matrix.Identity;
+
+            // Recurse into children
+            FlattenTransforms(child, skeleton);
         }
     }
 
     /// <summary>
-    /// Extracts animation information from the node content.
+    /// Extracts animation clips from the model, using the flattened skeleton
+    /// for correct bone index mapping.
+    ///
+    /// Searches for animations in multiple locations (Mixamo-specific):
+    /// 1. skeleton.Animations (standard location)
+    /// 2. input.Animations (root node)
+    /// 3. Child nodes recursively
     /// </summary>
-    private System.Collections.Generic.Dictionary<string, TimeSpan> ExtractAnimations(
+    private Dictionary<string, SkinningDataClip> ProcessAnimations(
+        BoneContent skeleton,
+        IList<BoneContent> bones,
         NodeContent input,
         ContentProcessorContext context)
     {
-        var animations = new System.Collections.Generic.Dictionary<string, TimeSpan>();
-
-        // Check for animations in the node hierarchy
-        foreach (var animation in input.Animations)
+        // Build bone-name-to-index mapping from flattened skeleton
+        var boneMap = new Dictionary<string, int>();
+        for (int i = 0; i < bones.Count; i++)
         {
-            TimeSpan duration = animation.Value.Duration;
-            animations[animation.Key] = duration;
+            boneMap[bones[i].Name] = i;
         }
 
-        // Also check child nodes (some FBX files store animations differently)
-        foreach (NodeContent child in input.Children)
+        // Collect all animations from multiple locations
+        var allAnimations = new Dictionary<string, AnimationContent>();
+
+        // 1. Check skeleton.Animations first (standard location)
+        foreach (var anim in skeleton.Animations)
         {
-            foreach (var animation in child.Animations)
+            allAnimations[anim.Key] = anim.Value;
+            context.Logger.LogMessage("Found animation '{0}' on skeleton", anim.Key);
+        }
+
+        // 2. Check input.Animations (root node)
+        foreach (var anim in input.Animations)
+        {
+            if (!allAnimations.ContainsKey(anim.Key))
             {
-                if (!animations.ContainsKey(animation.Key))
-                {
-                    animations[animation.Key] = animation.Value.Duration;
-                }
+                allAnimations[anim.Key] = anim.Value;
+                context.Logger.LogMessage("Found animation '{0}' on root node", anim.Key);
             }
         }
 
-        return animations;
-    }
+        // 3. Check child nodes recursively
+        CollectAnimationsFromChildren(input, allAnimations, context);
 
-    /// <summary>
-    /// Builds the AnimationData structure from extracted animations.
-    /// </summary>
-    private AnimationData BuildAnimationData(
-        NodeContent input,
-        BoneContent? skeleton,
-        System.Collections.Generic.Dictionary<string, TimeSpan> animations,
-        ContentProcessorContext context)
-    {
-        var animationData = new AnimationData();
+        // Process each animation into a SkinningDataClip
+        var clips = new Dictionary<string, SkinningDataClip>();
 
-        // Build bone index mapping from skeleton if available
-        if (skeleton != null)
+        foreach (var animation in allAnimations)
         {
-            BuildBoneIndices(skeleton, animationData.BoneIndices, 0);
-            context.Logger.LogMessage("Built bone index mapping with {0} bones", animationData.BoneIndices.Count);
-        }
+            var keyframes = new List<SkinningDataKeyframe>();
 
-        // Extract keyframes from animations
-        foreach (var anim in animations)
-        {
-            var clip = new AnimationClip(anim.Key, anim.Value);
-
-            // Extract keyframes from NodeContent animation data
-            ExtractKeyframes(input, skeleton, anim.Key, clip, animationData.BoneIndices, context);
-
-            animationData.Clips[anim.Key] = clip;
-            context.Logger.LogMessage("Extracted animation '{0}' with {1} bone tracks",
-                anim.Key, clip.Keyframes.Count);
-        }
-
-        return animationData;
-    }
-
-    /// <summary>
-    /// Recursively builds the bone name to index mapping.
-    /// </summary>
-    private void BuildBoneIndices(BoneContent bone, System.Collections.Generic.Dictionary<string, int> indices, int currentIndex = 0)
-    {
-        indices[bone.Name] = currentIndex;
-
-        int childIndex = currentIndex + 1;
-        foreach (BoneContent child in bone.Children.OfType<BoneContent>())
-        {
-            BuildBoneIndices(child, indices, childIndex);
-            childIndex++;
-        }
-    }
-
-    /// <summary>
-    /// Extracts keyframes from bone animations and populates the animation clip.
-    /// In Mixamo FBX files, all animation channels are stored on the root bone,
-    /// with each channel named after the bone it affects.
-    /// For animation-only files without a skeleton, we extract from the root node itself.
-    /// </summary>
-    private void ExtractKeyframes(
-        NodeContent input,
-        BoneContent? skeleton,
-        string animationName,
-        AnimationClip clip,
-        System.Collections.Generic.Dictionary<string, int> boneIndices,
-        ContentProcessorContext context)
-    {
-        // Try to find animation on skeleton first
-        AnimationContent? animation = null;
-        bool isAnimationOnly = false;
-
-        if (skeleton != null && skeleton.Animations.TryGetValue(animationName, out animation))
-        {
-            // Found on skeleton bone - process normally
-            context.Logger.LogMessage("Extracting {0} channels from animation '{1}'",
-                animation.Channels.Count, animationName);
-        }
-        else
-        {
-            // Animation-only file: collect channels from all child nodes
-            context.Logger.LogMessage("Animation-only file detected - collecting channels from node hierarchy");
-            isAnimationOnly = true;
-        }
-
-        // If boneIndices is empty (animation-only file), build it from animation channels
-        bool buildIndices = boneIndices.Count == 0;
-        int nextBoneIndex = 0;
-
-        // Collect all nodes with animations
-        var nodesToProcess = new System.Collections.Generic.List<(NodeContent node, AnimationContent anim)>();
-
-        if (isAnimationOnly)
-        {
-            // For animation-only files, collect animations from all nodes in hierarchy
-            void CollectAnimations(NodeContent node)
-            {
-                if (node.Animations.TryGetValue(animationName, out AnimationContent? anim))
-                {
-                    nodesToProcess.Add((node, anim));
-                }
-                foreach (NodeContent child in node.Children)
-                {
-                    CollectAnimations(child);
-                }
-            }
-            CollectAnimations(input);
-            context.Logger.LogMessage("Found animation on {0} nodes in hierarchy", nodesToProcess.Count);
-        }
-        else if (animation != null)
-        {
-            // For normal files, just process the one animation
-            nodesToProcess.Add((input, animation));
-        }
-
-        // Process all collected animations
-        foreach (var (node, anim) in nodesToProcess)
-        {
-            // Each channel is named after the bone it animates
-            foreach (var channel in anim.Channels)
+            foreach (var channel in animation.Value.Channels)
             {
                 string boneName = channel.Key;
-                var animKeyframes = channel.Value;
 
-                // Get or create bone index for this channel
-                int boneIndex;
-                if (!boneIndices.TryGetValue(boneName, out boneIndex))
+                // Resolve bone name to flattened index
+                if (!boneMap.TryGetValue(boneName, out int boneIndex))
                 {
-                    if (buildIndices)
-                    {
-                        // For animation-only files, create bone indices on-the-fly
-                        boneIndex = nextBoneIndex++;
-                        boneIndices[boneName] = boneIndex;
-                    }
-                    else
-                    {
-                        continue; // Skip bones not in our skeleton
-                    }
+                    context.Logger.LogWarning(null, null,
+                        "Animation '{0}' channel '{1}' not found in skeleton, skipping",
+                        animation.Key, boneName);
+                    continue;
                 }
 
-                // Convert animation keyframes to our Keyframe format
-                var keyframes = new System.Collections.Generic.List<Keyframe>();
-                foreach (var animKeyframe in animKeyframes)
+                // Convert each keyframe
+                foreach (var kf in channel.Value)
                 {
-                    keyframes.Add(new Keyframe(
-                        animKeyframe.Time,
-                        boneIndex,
-                        animKeyframe.Transform));
-                }
-
-                // Sort by time and store
-                keyframes.Sort((a, b) => a.Time.CompareTo(b.Time));
-                clip.Keyframes[boneName] = keyframes;
-
-                // Debug: log first bone with keyframes
-                if (clip.Keyframes.Count == 1)
-                {
-                    context.Logger.LogMessage("First bone '{0}' has {1} keyframes", boneName, keyframes.Count);
+                    keyframes.Add(new SkinningDataKeyframe(boneIndex, kf.Time, kf.Transform));
                 }
             }
+
+            // Sort by Time then by Bone index (canonical ordering for cache-friendly playback)
+            keyframes.Sort((a, b) =>
+            {
+                int cmp = a.Time.CompareTo(b.Time);
+                return cmp != 0 ? cmp : a.Bone.CompareTo(b.Bone);
+            });
+
+            clips[animation.Key] = new SkinningDataClip(animation.Value.Duration, keyframes);
+            context.Logger.LogImportantMessage(
+                "  Clip '{0}': duration={1:F2}s, keyframes={2}",
+                animation.Key, animation.Value.Duration.TotalSeconds, keyframes.Count);
         }
 
-        if (buildIndices && boneIndices.Count > 0)
+        return clips;
+    }
+
+    /// <summary>
+    /// Recursively collects animations from child nodes.
+    /// Some Mixamo FBX files store animations on child nodes rather than the skeleton root.
+    /// </summary>
+    private void CollectAnimationsFromChildren(
+        NodeContent node,
+        Dictionary<string, AnimationContent> animations,
+        ContentProcessorContext context)
+    {
+        foreach (NodeContent child in node.Children)
         {
-            context.Logger.LogMessage("Built {0} bone indices from animation channels", boneIndices.Count);
+            foreach (var anim in child.Animations)
+            {
+                if (!animations.ContainsKey(anim.Key))
+                {
+                    animations[anim.Key] = anim.Value;
+                    context.Logger.LogMessage("Found animation '{0}' on child node '{1}'",
+                        anim.Key, child.Name);
+                }
+            }
+
+            CollectAnimationsFromChildren(child, animations, context);
+        }
+    }
+
+    /// <summary>
+    /// Processes a model without a recognized skeleton (animation-only or static model).
+    /// For animation-only FBX files, extracts animations from the node hierarchy
+    /// with incrementally assigned bone indices. The skeleton data (bind pose,
+    /// inverse bind pose) is empty -- it will come from the base model at runtime.
+    /// </summary>
+    private ModelContent ProcessWithoutSkeleton(NodeContent input, ContentProcessorContext context)
+    {
+        // Extract animations from node hierarchy
+        var allAnimations = new Dictionary<string, AnimationContent>();
+
+        // Check root node
+        foreach (var anim in input.Animations)
+        {
+            allAnimations[anim.Key] = anim.Value;
+            context.Logger.LogMessage("Found animation '{0}' on root node (no skeleton)", anim.Key);
         }
 
-        context.Logger.LogMessage("Extracted {0} bone tracks", clip.Keyframes.Count);
+        // Check child nodes recursively
+        CollectAnimationsFromChildren(input, allAnimations, context);
+
+        // Build bone indices from animation channel names (incrementing counter)
+        var boneMap = new Dictionary<string, int>();
+        var clips = new Dictionary<string, SkinningDataClip>();
+
+        foreach (var animation in allAnimations)
+        {
+            var keyframes = new List<SkinningDataKeyframe>();
+
+            foreach (var channel in animation.Value.Channels)
+            {
+                string boneName = channel.Key;
+
+                // Assign bone index incrementally for animation-only files
+                if (!boneMap.TryGetValue(boneName, out int boneIndex))
+                {
+                    boneIndex = boneMap.Count;
+                    boneMap[boneName] = boneIndex;
+                }
+
+                foreach (var kf in channel.Value)
+                {
+                    keyframes.Add(new SkinningDataKeyframe(boneIndex, kf.Time, kf.Transform));
+                }
+            }
+
+            // Sort by Time then by Bone index
+            keyframes.Sort((a, b) =>
+            {
+                int cmp = a.Time.CompareTo(b.Time);
+                return cmp != 0 ? cmp : a.Bone.CompareTo(b.Bone);
+            });
+
+            clips[animation.Key] = new SkinningDataClip(animation.Value.Duration, keyframes);
+            context.Logger.LogImportantMessage(
+                "  Clip '{0}' (no skeleton): duration={1:F2}s, keyframes={2}",
+                animation.Key, animation.Value.Duration.TotalSeconds, keyframes.Count);
+        }
+
+        if (clips.Count > 0)
+        {
+            context.Logger.LogImportantMessage(
+                "Extracted {0} animation clip(s) with {1} unique bone names (no skeleton data)",
+                clips.Count, boneMap.Count);
+        }
+
+        // Call base.Process for standard mesh processing
+        ModelContent model = base.Process(input, context);
+
+        // Attach SkinningData with empty skeleton arrays (0 bones)
+        // At runtime, animation clips from this file will be merged into
+        // the base model's SkinningData which has the actual skeleton.
+        var emptyBindPose = new List<Matrix>();
+        var emptyInverseBindPose = new List<Matrix>();
+        var emptyHierarchy = new List<int>();
+
+        model.Tag = new SkinningData(clips, emptyBindPose, emptyInverseBindPose, emptyHierarchy);
+
+        context.Logger.LogWarning(null, null,
+            "Model '{0}' processed without skeleton data. " +
+            "Animation clips are available but skeleton data (bind pose, inverse bind pose) " +
+            "must be provided by the base model at runtime merge.", input.Name);
+
+        context.Logger.LogImportantMessage("=== Mixamo model processing complete (no skeleton): {0} ===", input.Name);
+        return model;
     }
 }
