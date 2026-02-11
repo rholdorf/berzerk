@@ -45,11 +45,10 @@ Plans:
   3. Bind pose and inverse bind pose matrices are both present and mathematically consistent (bindPose * inverseBindPose approximates identity)
   4. Animation keyframes are extracted from separate Mixamo FBX files with frame counts and durations that match the source animations
   5. The processor forces SkinnedEffect (workaround for MonoGame Issue #3057) so meshes use GPU skinning
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Rewrite MixamoModelProcessor to produce SkinningData and delete old pipeline types
 
 ### Phase 3: Animation Runtime
 **Goal**: The runtime can read animation data and compute correct skinning matrices each frame via the three-stage transform pipeline
