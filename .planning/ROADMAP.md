@@ -60,11 +60,11 @@ Plans:
   3. Multiple animation clips loaded from separate FBX files are available in the animation dictionary
   4. Calling a method to switch clips changes which animation is playing, and the new clip plays from the beginning
   5. Loop control works: a looping animation restarts when it reaches the end
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Re-download animation FBX files from Mixamo with "With Skin" to fix bone coverage
+- [ ] 03-02-PLAN.md — Create AnimationPlayer, rewrite AnimatedModel to use SkinningData, delete old runtime types
 
 ### Phase 4: Rendering and Game Integration
 **Goal**: The animated character renders with correct vertex deformation (no more T-pose) and game code uses the new animation system
@@ -103,6 +103,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. SkinningData Types | 2/2 | Complete | 2026-02-10 |
 | 2. Content Pipeline Processor | 1/1 | Complete | 2026-02-11 |
-| 3. Animation Runtime | 0/TBD | Not started | - |
+| 3. Animation Runtime | 0/2 | Not started | - |
 | 4. Rendering and Game Integration | 0/TBD | Not started | - |
 | 5. Verification and Polish | 0/TBD | Not started | - |
