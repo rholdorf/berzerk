@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Create a reusable pipeline that works with any Mixamo model
-**Current focus:** Phase 2 - Content Pipeline Processor
+**Current focus:** Phase 3 - Animation Runtime
 
 ## Current Position
 
-Phase: 2 of 5 (Content Pipeline Processor) -- COMPLETE
-Plan: 1 of 1 in current phase
-Status: Phase Complete
-Last activity: 2026-02-11 -- Completed 02-01-PLAN.md (Rewrite MixamoModelProcessor)
+Phase: 3 of 5 (Animation Runtime)
+Plan: 1 of 2 in current phase -- COMPLETE
+Status: Executing Phase
+Last activity: 2026-02-11 -- Completed 03-01-PLAN.md (Fix Animation Bone Coverage)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 2.3min
-- Total execution time: 0.12 hours
+- Total plans completed: 4
+- Average duration: 2min
+- Total execution time: 0.13 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 01-skinningdata-types-and-serialization | 2/2 | 5min | 2.5min |
 | 02-content-pipeline-processor | 1/1 | 2min | 2min |
+| 03-animation-runtime | 1/2 | 1min | 1min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 2min, 2min
+- Last 5 plans: 3min, 2min, 2min, 1min
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -52,8 +53,10 @@ Recent decisions affecting current work:
 - [01-02]: Type aliases (PipelineSkinningData vs RuntimeSkinningData) to disambiguate identical class names across assemblies
 - [02-01]: Used MeshHelper.FlattenSkeleton for canonical bone ordering (replaces custom depth-first BuildBoneIndices)
 - [02-01]: DefaultEffect override confirmed working in MonoGame 3.8.4.1 (no ConvertMaterial fallback needed)
-- [02-01]: Animation-only FBX files produce SkinningData with empty skeleton arrays (0 bones) -- clips merged at runtime
+- [02-01]: ~~Animation-only FBX files produce SkinningData with empty skeleton arrays (0 bones) -- clips merged at runtime~~ (superseded by 03-01)
 - [02-01]: Old pipeline types (AnimationData, AnimationClip, Keyframe, AnimationDataWriter) deleted
+- [03-01]: Animation FBX files must be downloaded "With Skin" to embed full skeleton -- all 4 animations now produce 65 bones matching test-character.fbx
+- [03-01]: Previous 0-bone animation observation superseded -- all animations produce full 65-bone SkinningData via FlattenSkeleton
 
 ### Pending Todos
 
@@ -63,11 +66,11 @@ None yet.
 
 - [RESOLVED] MonoGame Issue #3057 (SkinnedEffect silently ignored) -- DefaultEffect override works correctly in 3.8.4.1
 - [RESOLVED] FBX compatibility with Assimp 5.x -- content build succeeds for all 5 Mixamo FBX files
-- [Note]: Animation-only FBX files extract only 1 bone channel (mixamorig:Hips) without skeleton. Full bone animation merging is a Phase 3/4 concern.
+- [RESOLVED] Animation-only FBX files extracted only 1 bone channel -- fixed by re-downloading with "With Skin" option (03-01)
 - [Note]: Game will NOT load models correctly between Phase 2 and Phase 3 (pipeline writes SkinningData but runtime expects AnimationData). Expected and documented.
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 02-01-PLAN.md -- Phase 2 complete, ready for Phase 3
+Stopped at: Completed 03-01-PLAN.md -- Animation bone coverage fixed, ready for 03-02 (animation runtime)
 Resume file: None
