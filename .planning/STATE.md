@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Create a reusable pipeline that works with any Mixamo model
-**Current focus:** Phase 4 - Rendering and Game Integration
+**Current focus:** Phase 4 complete -- ready for Phase 5
 
 ## Current Position
 
-Phase: 4 of 5 (Rendering and Game Integration)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-12 -- Completed 04-01-PLAN.md (Skinned Rendering Pipeline)
+Phase: 4 of 5 (Rendering and Game Integration) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-02-12 -- Completed 04-02-PLAN.md (Enemy Model Consolidation)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 2min
-- Total execution time: 0.2 hours
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [███████░░░] 70%
 | 01-skinningdata-types-and-serialization | 2/2 | 5min | 2.5min |
 | 02-content-pipeline-processor | 1/1 | 2min | 2min |
 | 03-animation-runtime | 2/2 | 3min | 1.5min |
-| 04-rendering-and-game-integration | 1/2 | 2min | 2min |
+| 04-rendering-and-game-integration | 2/2 | 4min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 1min, 2min, 2min
+- Last 5 plans: 2min, 1min, 2min, 2min, 2min
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -62,6 +62,8 @@ Recent decisions affecting current work:
 - [03-02]: AddAnimationsFrom refuses to create SkinningData from nothing (requires base model with skeleton)
 - [04-01]: Used lazy EnsureSkinnedEffects in Draw (not LoadContent) to avoid changing LoadContent signature and all callers
 - [04-01]: BasicEffect fallback kept in Draw loop for static models without skinning data
+- [04-02]: CreateEnemyModel takes no ContentManager param -- EnemyRenderer stores _content from LoadRobotModels
+- [04-02]: Each enemy gets own AnimatedModel instance to prevent synchronized animation (Research Pitfall 4)
 
 ### Pending Todos
 
@@ -77,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 04-01-PLAN.md -- Skinned rendering pipeline active, ready for 04-02 (game integration)
+Stopped at: Completed 04-02-PLAN.md -- Phase 4 complete, full animation pipeline end-to-end, ready for Phase 5
 Resume file: None
