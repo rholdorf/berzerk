@@ -30,4 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Berzerk.ContentPipeline\Berzerk.ContentPipeline.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <MonoGameContentReference Include="Content\Content.mgcb" />
+  </ItemGroup>
 </Project>
