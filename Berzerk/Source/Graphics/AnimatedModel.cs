@@ -11,13 +11,14 @@ namespace Berzerk.Graphics;
 /// <summary>
 /// Handles loading and rendering of 3D models with animation support.
 /// Uses SkinningData + AnimationPlayer for the canonical XNA three-stage skinning pipeline.
+/// Draw uses SkinnedEffect.SetBoneTransforms() for GPU-skinned rendering.
 /// </summary>
 public class AnimatedModel
 {
     private Model? _model;
-    private Matrix[] _boneTransforms = Array.Empty<Matrix>();
     private SkinningData? _skinningData;
     private AnimationPlayer? _animationPlayer;
+    private bool _effectsChecked;
 
     private string? _currentClipName;
 
@@ -30,10 +31,6 @@ public class AnimatedModel
     {
         // Load model
         _model = content.Load<Model>(modelPath);
-
-        // Initialize bone transforms array (used by Draw with BasicEffect)
-        _boneTransforms = new Matrix[_model.Bones.Count];
-        _model.CopyAbsoluteBoneTransformsTo(_boneTransforms);
 
         // Extract skinning data from Model.Tag
         _skinningData = _model.Tag as SkinningData;
@@ -74,13 +71,20 @@ public class AnimatedModel
     }
 
     /// <summary>
-    /// Draws the model with current bone transforms.
-    /// Still uses BasicEffect with Model.Bones transforms (Phase 4 switches to SkinnedEffect + skinTransforms).
+    /// Draws the model using SkinnedEffect with GPU-skinned bone transforms.
+    /// On first invocation, ensures all mesh parts use SkinnedEffect (handles MonoGame Issue #3057).
     /// </summary>
     public void Draw(GraphicsDevice graphicsDevice, Matrix world, Matrix view, Matrix projection)
     {
         if (_model == null)
             return;
+
+        // One-time effect replacement on first draw (handles MonoGame Issue #3057)
+        if (!_effectsChecked)
+        {
+            EnsureSkinnedEffects(graphicsDevice);
+            _effectsChecked = true;
+        }
 
         // Enable backface culling and depth testing
         RasterizerState rasterizerState = new RasterizerState
@@ -88,58 +92,73 @@ public class AnimatedModel
             CullMode = CullMode.CullCounterClockwiseFace
         };
         graphicsDevice.RasterizerState = rasterizerState;
-
-        // Ensure depth testing is enabled for proper occlusion
         graphicsDevice.DepthStencilState = DepthStencilState.Default;
 
-        // Render spheres first, then other meshes (for proper depth sorting)
-        // This ensures armor pieces occlude the joint spheres correctly
-        var sphereMeshes = new List<ModelMesh>();
-        var otherMeshes = new List<ModelMesh>();
+        // Get skin transforms from animation player
+        Matrix[]? skinTransforms = _animationPlayer?.GetSkinTransforms();
 
-        foreach (var mesh in _model.Meshes)
+        foreach (ModelMesh mesh in _model.Meshes)
         {
-            string meshName = mesh.Name.ToLower();
-            if (meshName.Contains("sphere") || meshName.Contains("joint"))
+            foreach (Effect effect in mesh.Effects)
             {
-                sphereMeshes.Add(mesh);
+                if (effect is SkinnedEffect skinnedEffect)
+                {
+                    if (skinTransforms != null)
+                        skinnedEffect.SetBoneTransforms(skinTransforms);
+                    skinnedEffect.World = world;
+                    skinnedEffect.View = view;
+                    skinnedEffect.Projection = projection;
+                    skinnedEffect.EnableDefaultLighting();
+                    skinnedEffect.PreferPerPixelLighting = true;
+                }
+                else if (effect is BasicEffect basicEffect)
+                {
+                    // Fallback for static models without skinning data
+                    basicEffect.World = world;
+                    basicEffect.View = view;
+                    basicEffect.Projection = projection;
+                    basicEffect.EnableDefaultLighting();
+                    basicEffect.PreferPerPixelLighting = true;
+                }
             }
-            else
-            {
-                otherMeshes.Add(mesh);
-            }
-        }
-
-        // Draw spheres first
-        foreach (var mesh in sphereMeshes)
-        {
-            foreach (BasicEffect effect in mesh.Effects)
-            {
-                effect.World = _boneTransforms[mesh.ParentBone.Index] * world;
-                effect.View = view;
-                effect.Projection = projection;
-
-                effect.EnableDefaultLighting();
-                effect.PreferPerPixelLighting = true;
-            }
-
             mesh.Draw();
         }
+    }
 
-        // Draw other meshes on top (will occlude spheres where appropriate)
-        foreach (var mesh in otherMeshes)
+    /// <summary>
+    /// Ensures all mesh parts use SkinnedEffect instead of BasicEffect.
+    /// Handles MonoGame Issue #3057 where DefaultEffect = SkinnedEffect may not propagate
+    /// through the content pipeline. Runs once on first Draw call.
+    /// </summary>
+    private void EnsureSkinnedEffects(GraphicsDevice graphicsDevice)
+    {
+        if (_model == null) return;
+
+        foreach (ModelMesh mesh in _model.Meshes)
         {
-            foreach (BasicEffect effect in mesh.Effects)
+            foreach (ModelMeshPart part in mesh.MeshParts)
             {
-                effect.World = _boneTransforms[mesh.ParentBone.Index] * world;
-                effect.View = view;
-                effect.Projection = projection;
+                Console.WriteLine($"AnimatedModel: Mesh '{mesh.Name}' part effect type: {part.Effect.GetType().Name}");
 
-                effect.EnableDefaultLighting();
-                effect.PreferPerPixelLighting = true;
+                if (part.Effect is BasicEffect basic)
+                {
+                    // Replace BasicEffect with SkinnedEffect, copying material properties
+                    var skinned = new SkinnedEffect(graphicsDevice)
+                    {
+                        DiffuseColor = basic.DiffuseColor,
+                        SpecularColor = basic.SpecularColor,
+                        SpecularPower = basic.SpecularPower,
+                        EmissiveColor = basic.EmissiveColor,
+                        Alpha = basic.Alpha,
+                        Texture = basic.Texture,
+                        WeightsPerVertex = 4,
+                        PreferPerPixelLighting = true
+                    };
+
+                    part.Effect = skinned;
+                    Console.WriteLine($"AnimatedModel: Replaced BasicEffect with SkinnedEffect for mesh '{mesh.Name}'");
+                }
             }
-
-            mesh.Draw();
         }
     }
 
