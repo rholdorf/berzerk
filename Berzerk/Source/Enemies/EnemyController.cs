@@ -15,11 +15,8 @@ public class EnemyController
     public EnemyHealth Health { get; }
     public bool IsActive { get; set; }
 
-    // Animated model references (shared instances from EnemyRenderer)
-    private AnimatedModel? _idleModel;
-    private AnimatedModel? _walkModel;
-    private AnimatedModel? _attackModel;
-    private AnimatedModel? _currentModel;
+    // Per-enemy animated model with all clips merged (independent AnimationPlayer)
+    private AnimatedModel? _animatedModel;
 
     // Movement settings (per CONTEXT: 70% of player's 5.0 speed)
     private const float MoveSpeed = 3.5f;
@@ -54,20 +51,18 @@ public class EnemyController
     }
 
     /// <summary>
-    /// Set animated models for all states (called by EnemyManager during spawn).
+    /// Set animated model for this enemy (called by EnemyManager during spawn).
+    /// Each enemy gets its own AnimatedModel with independent AnimationPlayer.
     /// </summary>
-    public void SetAnimatedModels(AnimatedModel? idle, AnimatedModel? walk, AnimatedModel? attack)
+    public void SetAnimatedModel(AnimatedModel? model)
     {
-        _idleModel = idle;
-        _walkModel = walk;
-        _attackModel = attack;
-        _currentModel = idle; // Start with idle
+        _animatedModel = model;
     }
 
     /// <summary>
-    /// Get current animated model for rendering.
+    /// Get animated model for rendering.
     /// </summary>
-    public AnimatedModel? CurrentModel => _currentModel;
+    public AnimatedModel? CurrentModel => _animatedModel;
 
     /// <summary>
     /// Activate enemy at specified position (for pooling).
@@ -130,7 +125,7 @@ public class EnemyController
         }
 
         // Update current animation
-        _currentModel?.Update(gameTime);
+        _animatedModel?.Update(gameTime);
     }
 
     private void UpdateIdleState(Vector3 playerPos)
@@ -255,27 +250,22 @@ public class EnemyController
     }
 
     /// <summary>
-    /// Switch current animated model based on enemy state.
+    /// Switch animation clip based on enemy state via PlayAnimation.
     /// </summary>
     private void SetCurrentModel(EnemyState state)
     {
-        AnimatedModel? targetModel = state switch
+        string? clipName = state switch
         {
-            EnemyState.Idle => _idleModel,
-            EnemyState.Chase => _walkModel,
-            EnemyState.Attack => _attackModel,
-            EnemyState.Dying => _currentModel, // Keep current model during death
-            _ => _idleModel
+            EnemyState.Idle => "idle",
+            EnemyState.Chase => "walk",
+            EnemyState.Attack => "bash",
+            EnemyState.Dying => null, // Keep current animation during death
+            _ => "idle"
         };
 
-        if (targetModel != null && targetModel != _currentModel)
+        if (clipName != null && _animatedModel != null)
         {
-            _currentModel = targetModel;
-            var animNames = _currentModel.GetAnimationNames();
-            if (animNames.Count > 0)
-            {
-                _currentModel.PlayAnimation(animNames[0]);
-            }
+            _animatedModel.PlayAnimation(clipName);
         }
     }
 

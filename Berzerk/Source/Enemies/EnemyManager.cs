@@ -172,11 +172,11 @@ public class EnemyManager
 
         enemy.Activate(position);
 
-        // Assign shared animation models from renderer
+        // Create per-enemy animated model with independent AnimationPlayer
         if (_enemyRenderer != null)
         {
-            var (idle, walk, attack) = _enemyRenderer.GetSharedModels();
-            enemy.SetAnimatedModels(idle, walk, attack);
+            var enemyModel = _enemyRenderer.CreateEnemyModel();
+            enemy.SetAnimatedModel(enemyModel);
         }
 
         // Subscribe to death event for drop system
