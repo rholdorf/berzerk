@@ -135,15 +135,13 @@ public class AnimationPlayer
 
     /// <summary>
     /// Stage 3: Multiply by inverse bind pose to produce final GPU skinning transforms.
-    /// skinTransform = worldTransform * inverseBindPose (CORRECTED ORDER)
+    /// skinTransform = inverseBindPose * worldTransform (canonical XNA SkinningSample order)
     /// </summary>
     public void UpdateSkinTransforms()
     {
         for (int bone = 0; bone < _skinTransforms.Length; bone++)
         {
-            // FIXED: Correct matrix multiplication order for MonoGame/XNA
-            // MonoGame uses row-major matrices, so: worldTransform * inverseBindPose
-            _skinTransforms[bone] = _worldTransforms[bone] * _skinningData.InverseBindPose[bone];
+            _skinTransforms[bone] = _skinningData.InverseBindPose[bone] * _worldTransforms[bone];
         }
     }
 

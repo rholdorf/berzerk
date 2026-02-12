@@ -139,7 +139,8 @@ public class MixamoModelProcessor : ModelProcessor
 
     /// <summary>
     /// Extracts animation clips from the model, using the flattened skeleton
-    /// for correct bone index mapping.
+    /// for correct bone index mapping. Applies PreRotation correction for bones
+    /// where the Assimp importer didn't bake PreRotation into keyframes.
     ///
     /// Searches for animations in multiple locations (Mixamo-specific):
     /// 1. skeleton.Animations (standard location)
@@ -158,6 +159,9 @@ public class MixamoModelProcessor : ModelProcessor
         {
             boneMap[bones[i].Name] = i;
         }
+
+        // Read PreRotation per bone from FBX binary file
+        var preRotations = ReadPreRotations(input, boneMap, context, out var preRotEulers);
 
         // Collect all animations from multiple locations
         var allAnimations = new Dictionary<string, AnimationContent>();
@@ -216,6 +220,9 @@ public class MixamoModelProcessor : ModelProcessor
                 return cmp != 0 ? cmp : a.Bone.CompareTo(b.Bone);
             });
 
+            // Apply PreRotation correction to keyframes that are missing it
+            keyframes = ApplyPreRotationCorrection(keyframes, bones, preRotations, preRotEulers, context, animation.Key);
+
             clips[animation.Key] = new SkinningDataClip(animation.Value.Duration, keyframes);
             context.Logger.LogImportantMessage(
                 "  Clip '{0}': duration={1:F2}s, keyframes={2}",
@@ -223,6 +230,229 @@ public class MixamoModelProcessor : ModelProcessor
         }
 
         return clips;
+    }
+
+    /// <summary>
+    /// Reads FBX PreRotation data and maps it to flattened skeleton bone indices.
+    /// Returns a dictionary of boneIndex → PreRotation rotation matrix, plus
+    /// the Euler angles for magnitude checking.
+    /// </summary>
+    private static Dictionary<int, Matrix> ReadPreRotations(
+        NodeContent input,
+        Dictionary<string, int> boneMap,
+        ContentProcessorContext context,
+        out Dictionary<int, Vector3> eulerAngles)
+    {
+        var result = new Dictionary<int, Matrix>();
+        eulerAngles = new Dictionary<int, Vector3>();
+
+        string? fbxPath = input.Identity?.SourceFilename;
+        if (string.IsNullOrEmpty(fbxPath))
+        {
+            context.Logger.LogWarning(null, null, "Cannot read PreRotation: no source file path available");
+            return result;
+        }
+
+        Dictionary<string, Vector3> preRotEulers;
+        try
+        {
+            preRotEulers = FbxPreRotationReader.Read(fbxPath);
+        }
+        catch (Exception ex)
+        {
+            context.Logger.LogWarning(null, null,
+                "Failed to read FBX PreRotation data: {0}", ex.Message);
+            return result;
+        }
+
+        context.Logger.LogImportantMessage("FBX PreRotation: found {0} bones with PreRotation", preRotEulers.Count);
+
+        foreach (var entry in preRotEulers)
+        {
+            if (boneMap.TryGetValue(entry.Key, out int boneIndex))
+            {
+                Matrix preRotMatrix = FbxPreRotationReader.EulerToMatrix(entry.Value);
+                result[boneIndex] = preRotMatrix;
+                eulerAngles[boneIndex] = entry.Value;
+                context.Logger.LogMessage("  PreRot[{0}] '{1}': ({2:F1}, {3:F1}, {4:F1})°",
+                    boneIndex, entry.Key, entry.Value.X, entry.Value.Y, entry.Value.Z);
+            }
+            else
+            {
+                context.Logger.LogMessage("  PreRot '{0}': not in skeleton (skipped)", entry.Key);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Applies PreRotation correction to animation keyframes.
+    ///
+    /// The Assimp FBX importer bakes PreRotation into bone.Transform (bind pose)
+    /// but inconsistently bakes it into animation keyframes. For each bone with
+    /// significant PreRotation (>15°), this method detects whether the keyframes
+    /// already include it by comparing the first keyframe's rotation to two references:
+    ///   - The bind pose rotation (which includes PreRotation)
+    ///   - The bind pose rotation with PreRotation removed
+    ///
+    /// Injection only occurs when the evidence is clear: the quaternion dot product
+    /// margin between "without PreRot" and "with PreRot" must exceed a threshold.
+    /// This prevents false positives from animation pose differences on bones with
+    /// moderate PreRotation.
+    ///
+    /// This mirrors the three.js FBXLoader approach of uniformly baking
+    /// PreRotation into all keyframes.
+    /// </summary>
+    private static List<SkinningDataKeyframe> ApplyPreRotationCorrection(
+        List<SkinningDataKeyframe> keyframes,
+        IList<BoneContent> bones,
+        Dictionary<int, Matrix> preRotations,
+        Dictionary<int, Vector3> preRotEulers,
+        ContentProcessorContext context,
+        string clipName)
+    {
+        if (keyframes.Count == 0 || preRotations.Count == 0)
+            return keyframes;
+
+        // Minimum PreRotation magnitude to consider (degrees).
+        // Bones with smaller PreRotation are skipped — the error is negligible
+        // and detection becomes unreliable due to animation pose noise.
+        const float MinPreRotDegrees = 15.0f;
+
+        // Minimum margin between dotWithoutPre and dotWithBind to trigger injection.
+        // Prevents false positives from bones where the animation pose difference
+        // makes the two references similarly distant from the keyframe rotation.
+        const float MinDetectionMargin = 0.05f;
+
+        // Find first keyframe for each bone (sorted by time, so first occurrence is earliest)
+        var firstKeyframe = new Dictionary<int, Matrix>();
+        foreach (var kf in keyframes)
+        {
+            if (!firstKeyframe.ContainsKey(kf.Bone))
+                firstKeyframe[kf.Bone] = kf.Transform;
+        }
+
+        // Determine which bones need PreRotation injected
+        var bonesNeedingFix = new HashSet<int>();
+
+        foreach (var entry in preRotations)
+        {
+            int boneIndex = entry.Key;
+            Matrix preRotMatrix = entry.Value;
+
+            if (!firstKeyframe.ContainsKey(boneIndex))
+                continue;
+            if (boneIndex >= bones.Count)
+                continue;
+
+            // Skip bones with small PreRotation — error is negligible and detection unreliable
+            if (preRotEulers.TryGetValue(boneIndex, out Vector3 euler))
+            {
+                float maxComponent = Math.Max(Math.Abs(euler.X), Math.Max(Math.Abs(euler.Y), Math.Abs(euler.Z)));
+                if (maxComponent < MinPreRotDegrees)
+                {
+                    context.Logger.LogMessage(
+                        "  Clip '{0}' bone[{1}] '{2}': PreRot too small ({3:F1}°), skipping",
+                        clipName, boneIndex, bones[boneIndex].Name, maxComponent);
+                    continue;
+                }
+            }
+
+            Matrix bindPose = bones[boneIndex].Transform;
+            Matrix kf0 = firstKeyframe[boneIndex];
+
+            // Decompose bind pose and first keyframe to get rotation quaternions
+            if (!bindPose.Decompose(out _, out Quaternion qBind, out _))
+                continue;
+            if (!kf0.Decompose(out _, out Quaternion qKf, out _))
+                continue;
+
+            // Compute bind pose rotation WITHOUT PreRotation
+            Quaternion qPreRot = Quaternion.CreateFromRotationMatrix(preRotMatrix);
+            Quaternion qPreRotInv = Quaternion.Inverse(qPreRot);
+            // qBindWithoutPre = the rotation that bind pose would have if PreRot were removed
+            // In XNA: bind rotation = PreRot * RestRot, so RestRot = Inverse(PreRot) * BindRot
+            // Quaternion multiply: q1 * q2 applies q2 first, then q1 (Hamilton convention)
+            // To get Inverse(PreRot) * BindRot: Quaternion.Multiply(qPreRotInv, qBind)
+            Quaternion qBindWithoutPre = Quaternion.Multiply(qPreRotInv, qBind);
+
+            // Compare keyframe rotation to both references using quaternion dot product
+            // |dot| close to 1 = same rotation, close to 0 = 90° apart
+            float dotWithBind = Math.Abs(Quaternion.Dot(qKf, qBind));
+            float dotWithoutPre = Math.Abs(Quaternion.Dot(qKf, qBindWithoutPre));
+            float margin = dotWithoutPre - dotWithBind;
+
+            if (margin > MinDetectionMargin)
+            {
+                // Clear evidence: keyframe is much closer to "without PreRot" → needs fix
+                bonesNeedingFix.Add(boneIndex);
+                context.Logger.LogImportantMessage(
+                    "  Clip '{0}' bone[{1}] '{2}': PreRot NOT in keyframes (margin={3:F4}) → injecting",
+                    clipName, boneIndex, bones[boneIndex].Name, margin);
+            }
+            else
+            {
+                context.Logger.LogMessage(
+                    "  Clip '{0}' bone[{1}] '{2}': PreRot already in keyframes (margin={3:F4})",
+                    clipName, boneIndex, bones[boneIndex].Name, margin);
+            }
+        }
+
+        if (bonesNeedingFix.Count == 0)
+        {
+            context.Logger.LogImportantMessage("  Clip '{0}': all bones have PreRot baked, no correction needed", clipName);
+            return keyframes;
+        }
+
+        context.Logger.LogImportantMessage(
+            "  Clip '{0}': injecting PreRotation into {1} bones", clipName, bonesNeedingFix.Count);
+
+        // Apply PreRotation to keyframes for bones that need it
+        var result = new List<SkinningDataKeyframe>(keyframes.Count);
+
+        foreach (var kf in keyframes)
+        {
+            if (bonesNeedingFix.Contains(kf.Bone) && preRotations.TryGetValue(kf.Bone, out Matrix preRotMatrix))
+            {
+                Matrix corrected = InjectPreRotation(kf.Transform, preRotMatrix);
+                result.Add(new SkinningDataKeyframe(kf.Bone, kf.Time, corrected));
+            }
+            else
+            {
+                result.Add(kf);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Injects PreRotation into a keyframe transform by decomposing it,
+    /// prepending the PreRotation to the rotation component, and recomposing.
+    ///
+    /// Input:  kf = S * R * T  (scale, then rotate, then translate)
+    /// Output: S * (PreRot * R) * T  (scale, then pre-rotate, then rotate, then translate)
+    /// </summary>
+    private static Matrix InjectPreRotation(Matrix keyframe, Matrix preRotMatrix)
+    {
+        if (!keyframe.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation))
+        {
+            // Decompose failed (e.g., degenerate matrix) — return as-is
+            return keyframe;
+        }
+
+        // Combine PreRotation with keyframe rotation
+        // In XNA row-major: M1 * M2 means apply M1 first
+        // We want: PreRot applied first, then keyframe's rotation
+        // So: newRotMatrix = preRotMatrix * rotMatrix
+        Matrix rotMatrix = Matrix.CreateFromQuaternion(rotation);
+        Matrix newRotMatrix = preRotMatrix * rotMatrix;
+        Quaternion newRotation = Quaternion.CreateFromRotationMatrix(newRotMatrix);
+
+        return Matrix.CreateScale(scale) *
+               Matrix.CreateFromQuaternion(newRotation) *
+               Matrix.CreateTranslation(translation);
     }
 
     /// <summary>
