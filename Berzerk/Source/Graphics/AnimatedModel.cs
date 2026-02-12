@@ -66,7 +66,7 @@ public class AnimatedModel
             return;
 
         // AnimationPlayer handles looping, keyframe scanning, hierarchy, everything.
-        // NOTE: skinTransforms are computed but not sent to GPU yet (Phase 4 switches to SkinnedEffect).
+        // skinTransforms are computed here and consumed by Draw via GetSkinTransforms().
         _animationPlayer.Update(gameTime.ElapsedGameTime, true, Matrix.Identity);
     }
 
