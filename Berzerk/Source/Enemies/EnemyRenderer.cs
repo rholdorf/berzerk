@@ -25,11 +25,9 @@ public class EnemyRenderer
     private const int SPHERE_SEGMENTS = 8; // Low poly arcade style
     private const float HEALTH_PICKUP_RADIUS = 0.3f; // Per plan specification
 
-    // Shared robot animation models (loaded once, reused by all enemies)
-    // Each model has test-character.fbx mesh + one specific animation
-    private AnimatedModel? _idleModel;
-    private AnimatedModel? _walkModel;
-    private AnimatedModel? _attackModel;
+    // Shared robot model with all animation clips merged (loaded once as prototype)
+    private AnimatedModel? _sharedRobotModel;
+    private ContentManager? _content;
 
     /// <summary>
     /// Initialize renderer with graphics device.
@@ -48,42 +46,42 @@ public class EnemyRenderer
     }
 
     /// <summary>
-    /// Load shared robot animation models (idle, walk, attack).
-    /// Loads test-character.fbx as base mesh and merges animations from separate files.
-    /// These are shared across all enemies to minimize memory usage.
+    /// Load shared robot model with all animation clips merged.
+    /// Loads test-character.fbx once and merges idle/walk/bash clips.
+    /// Stores ContentManager reference for per-enemy model creation.
     /// </summary>
     public void LoadRobotModels(ContentManager content)
     {
-        // Load idle model: base character + idle animation
-        _idleModel = new AnimatedModel();
-        _idleModel.LoadContent(content, "Models/test-character");
-        _idleModel.AddAnimationsFrom(content, "Models/idle", "idle");
-        _idleModel.PlayAnimation("idle");
-        Console.WriteLine("EnemyRenderer: Loaded idle model with 'idle' animation");
+        _content = content;
 
-        // Load walk model: base character + walk animation
-        _walkModel = new AnimatedModel();
-        _walkModel.LoadContent(content, "Models/test-character");
-        _walkModel.AddAnimationsFrom(content, "Models/walk", "walk");
-        _walkModel.PlayAnimation("walk");
-        Console.WriteLine("EnemyRenderer: Loaded walk model with 'walk' animation");
+        _sharedRobotModel = new AnimatedModel();
+        _sharedRobotModel.LoadContent(content, "Models/test-character");
+        _sharedRobotModel.AddAnimationsFrom(content, "Models/idle", "idle");
+        _sharedRobotModel.AddAnimationsFrom(content, "Models/walk", "walk");
+        _sharedRobotModel.AddAnimationsFrom(content, "Models/bash", "bash");
+        _sharedRobotModel.PlayAnimation("idle");
 
-        // Load attack model: base character + bash animation
-        _attackModel = new AnimatedModel();
-        _attackModel.LoadContent(content, "Models/test-character");
-        _attackModel.AddAnimationsFrom(content, "Models/bash", "bash");
-        _attackModel.PlayAnimation("bash");
-        Console.WriteLine("EnemyRenderer: Loaded attack model with 'bash' animation");
-
-        Console.WriteLine("EnemyRenderer: Loaded shared robot models with animations");
+        Console.WriteLine("EnemyRenderer: Loaded shared robot model with merged animations (idle, walk, bash)");
     }
 
     /// <summary>
-    /// Get shared animation models for enemy controllers.
+    /// Create a new AnimatedModel instance for an individual enemy.
+    /// Each enemy gets its own AnimatedModel with independent AnimationPlayer.
+    /// MonoGame's ContentManager caches the underlying Model object, so
+    /// calling LoadContent with the same path reuses the GPU model -- no duplicate GPU memory.
     /// </summary>
-    public (AnimatedModel? idle, AnimatedModel? walk, AnimatedModel? attack) GetSharedModels()
+    public AnimatedModel CreateEnemyModel()
     {
-        return (_idleModel, _walkModel, _attackModel);
+        if (_content == null)
+            throw new InvalidOperationException("LoadRobotModels must be called before CreateEnemyModel");
+
+        var model = new AnimatedModel();
+        model.LoadContent(_content, "Models/test-character");
+        model.AddAnimationsFrom(_content, "Models/idle", "idle");
+        model.AddAnimationsFrom(_content, "Models/walk", "walk");
+        model.AddAnimationsFrom(_content, "Models/bash", "bash");
+        model.PlayAnimation("idle");
+        return model;
     }
 
     /// <summary>
