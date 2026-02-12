@@ -142,7 +142,10 @@ public class AnimatedModel
 
                 if (part.Effect is BasicEffect basic)
                 {
-                    // Replace BasicEffect with SkinnedEffect, copying material properties
+                    // Replace BasicEffect with SkinnedEffect, copying material properties.
+                    // Note: SkinnedEffect does NOT have TextureEnabled (unlike BasicEffect).
+                    // It uses the texture automatically when Texture is non-null.
+                    // Flat gray rendering means the source model has no embedded textures.
                     var skinned = new SkinnedEffect(graphicsDevice)
                     {
                         DiffuseColor = basic.DiffuseColor,
@@ -156,7 +159,7 @@ public class AnimatedModel
                     };
 
                     part.Effect = skinned;
-                    Console.WriteLine($"AnimatedModel: Replaced BasicEffect with SkinnedEffect for mesh '{mesh.Name}'");
+                    Console.WriteLine($"AnimatedModel: Replaced BasicEffect with SkinnedEffect for mesh '{mesh.Name}' (texture: {(basic.Texture != null ? basic.Texture.Name : "none")})");
                 }
             }
         }
